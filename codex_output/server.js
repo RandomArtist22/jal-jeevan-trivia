@@ -3,11 +3,33 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 
+loadEnvFile(path.join(__dirname, ".env"));
+
 const PORT = Number(process.env.PORT || 3000);
 const ADMIN_PIN = process.env.ADMIN_PIN || "jaljeevan-admin";
+const PLAYER_PIN = process.env.PLAYER_PIN || "jaljeevan-player";
+const PUBLIC_BASE_URL = String(process.env.PUBLIC_BASE_URL || "").trim().replace(/\/+$/, "");
 const PUBLIC_DIR = path.join(__dirname, "public");
 const QUESTION_BANK = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "questions.json"), "utf8"));
-const SAFE_LEVELS = [20, 1000];
+const HOT_SEAT_BANKS = {
+  "set-1": {
+    key: "set-1",
+    label: "Hot Seat Set 1",
+    questions: JSON.parse(fs.readFileSync(path.join(__dirname, "data", "hotseat-questions-set-1.json"), "utf8"))
+  },
+  "set-2": {
+    key: "set-2",
+    label: "Hot Seat Set 2",
+    questions: JSON.parse(fs.readFileSync(path.join(__dirname, "data", "hotseat-questions-set-2.json"), "utf8"))
+  },
+  "set-3": {
+    key: "set-3",
+    label: "Hot Seat Set 3",
+    questions: JSON.parse(fs.readFileSync(path.join(__dirname, "data", "hotseat-questions-set-3.json"), "utf8"))
+  }
+};
+const DEFAULT_HOT_SEAT_SET = "set-1";
+const SAFE_LEVELS = [50, 1000];
 const QUALIFIER_LIMIT = 8;
 const AUDIENCE_QUALIFIER_LIMIT = 2;
 
@@ -22,6 +44,27 @@ const MIME_TYPES = {
   ".svg": "image/svg+xml",
   ".ico": "image/x-icon"
 };
+
+function loadEnvFile(filePath) {
+  if (!fs.existsSync(filePath)) return;
+  const source = fs.readFileSync(filePath, "utf8");
+  for (const rawLine of source.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("#")) continue;
+    const separatorIndex = line.indexOf("=");
+    if (separatorIndex <= 0) continue;
+    const key = line.slice(0, separatorIndex).trim();
+    if (!key || process.env[key] !== undefined) continue;
+    let value = line.slice(separatorIndex + 1).trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    process.env[key] = value;
+  }
+}
 
 function createInitialState() {
   return {
@@ -54,6 +97,7 @@ function createInitialState() {
     },
     hotSeat: {
       status: "idle",
+      questionSetKey: DEFAULT_HOT_SEAT_SET,
       teamId: null,
       questionIndex: 0,
       startedAt: null,
@@ -76,6 +120,10 @@ function createInitialState() {
       history: []
     }
   };
+}
+
+function publicRoute(pathname = "") {
+  return `${PUBLIC_BASE_URL || ""}${pathname}`;
 }
 
 let state = createInitialState();
@@ -109,8 +157,12 @@ function getTeam(teamId) {
   return teamId ? state.teams[teamId] : null;
 }
 
+function getHotSeatBank(questionSetKey = state.hotSeat.questionSetKey) {
+  return HOT_SEAT_BANKS[questionSetKey] || HOT_SEAT_BANKS[DEFAULT_HOT_SEAT_SET];
+}
+
 function getHotSeatQuestion() {
-  return QUESTION_BANK.hotSeat[state.hotSeat.questionIndex] || null;
+  return getHotSeatBank().questions[state.hotSeat.questionIndex] || null;
 }
 
 function getFFFQuestion() {
@@ -166,7 +218,7 @@ function sanitizeQuestion(question, includeAnswer = false) {
 }
 
 function buildScoreLadder() {
-  return QUESTION_BANK.hotSeat.map((question, index) => ({
+  return getHotSeatBank().questions.map((question, index) => ({
     level: index + 1,
     points: question.points,
     isSafe: SAFE_LEVELS.includes(question.points)
@@ -177,29 +229,51 @@ function buildStateForClient(client) {
   const team = client.teamId ? getTeam(client.teamId) : null;
   const isHost = client.isHost;
   const isHotSeatScreen = client.role === "hotseat-screen";
+  const isAudiencePoll = client.role === "audience-poll";
   const currentHotSeatQuestion = getHotSeatQuestion();
   const currentFFFQuestion = getFFFQuestion();
   const screeningQuestions = QUESTION_BANK.screening.map((question) => sanitizeQuestion(question, isHost));
-  const canSeeHotSeatQuestion = isHost || isHotSeatScreen;
+  const canSeeHotSeatQuestion = isHost || isHotSeatScreen || isAudiencePoll;
   const canSeeHotSeatSelection = isHost || isHotSeatScreen;
+  const audiencePoll = state.hotSeat.audiencePoll
+    ? {
+        status: state.hotSeat.audiencePoll.status,
+        questionId: state.hotSeat.audiencePoll.questionId,
+        counts: state.hotSeat.audiencePoll.counts.slice(),
+        totalVotes: state.hotSeat.audiencePoll.totalVotes,
+        percentages: state.hotSeat.audiencePoll.percentages.slice(),
+        pollUrl: publicRoute("/audience-poll")
+      }
+    : null;
 
   return {
     now: Date.now(),
     config: {
       eventTitle: state.eventTitle,
       eventSubtitle: state.eventSubtitle,
+      publicBaseUrl: PUBLIC_BASE_URL,
+      hasPlayerPassword: Boolean(PLAYER_PIN),
       screeningDurationMs: state.screening.durationMs,
       fffDurationMs: state.fff.durationMs,
       fffQuestionCount: QUESTION_BANK.fastestFinger.length,
       qualifierLimit: QUALIFIER_LIMIT,
       audienceQualifierLimit: AUDIENCE_QUALIFIER_LIMIT,
       safeLevels: SAFE_LEVELS,
+      hotSeatQuestionSets: Object.values(HOT_SEAT_BANKS).map((bank) => ({
+        key: bank.key,
+        label: bank.label,
+        count: bank.questions.length
+      })),
       hotSeatLadder: buildScoreLadder()
     },
     session: {
       role: client.role,
       isHost,
-      teamId: team ? team.id : null
+      teamId: team ? team.id : null,
+      canPlay: client.role === "player" ? Boolean(client.isPlayerAuthorized) : false,
+      audienceVoteIndex: isAudiencePoll && audiencePoll && client.voterId
+        ? Number(state.hotSeat.audiencePoll?.voters?.[client.voterId] ?? -1)
+        : -1
     },
     phase: state.phase,
     notice: state.notice,
@@ -236,6 +310,7 @@ function buildStateForClient(client) {
     },
     hotSeat: {
       status: state.hotSeat.status,
+      questionSetKey: state.hotSeat.questionSetKey,
       teamId: state.hotSeat.teamId,
       questionIndex: state.hotSeat.questionIndex,
       startedAt: state.hotSeat.startedAt,
@@ -255,7 +330,7 @@ function buildStateForClient(client) {
       lifelinesAvailable: state.hotSeat.lifelinesAvailable.slice(),
       lifelinesUsed: state.hotSeat.lifelinesUsed.slice(),
       reducedOptionIndices: state.hotSeat.reducedOptionIndices.slice(),
-      audiencePoll: state.hotSeat.audiencePoll,
+      audiencePoll,
       callActiveUntil: state.hotSeat.callActiveUntil,
       revealedAnswerIndex: state.hotSeat.reveal ? currentHotSeatQuestion?.answerIndex ?? null : null,
       history: clone(state.hotSeat.history),
@@ -264,14 +339,14 @@ function buildStateForClient(client) {
     },
     privateTeam: team
       ? {
-          id: team.id,
-          name: team.name,
-          members: team.members,
-          score: team.score,
-          screeningScore: team.screeningScore,
-          qualified: team.qualified,
-          isAudience: team.isAudience
-        }
+        id: team.id,
+        name: team.name,
+        members: team.members,
+        score: team.score,
+        screeningScore: team.screeningScore,
+        qualified: team.qualified,
+        isAudience: team.isAudience
+      }
       : null
   };
 }
@@ -351,6 +426,10 @@ function parseFrames(buffer) {
 }
 
 function registerTeam(payload, client) {
+  if (!client.isPlayerAuthorized) {
+    send(client, "error", { message: "Enter the player password before using this endpoint." });
+    return;
+  }
   const name = String(payload.name || "").trim();
   const members = String(payload.members || "").trim();
   const isAudience = Boolean(payload.isAudience);
@@ -385,6 +464,10 @@ function registerTeam(payload, client) {
 }
 
 function reconnectTeam(payload, client) {
+  if (!client.isPlayerAuthorized) {
+    send(client, "error", { message: "Enter the player password before restoring a team." });
+    return;
+  }
   const team = getTeam(payload.teamId);
   if (!team) {
     send(client, "error", { message: "Team not found on the host server." });
@@ -570,6 +653,38 @@ function clearHotSeatTimer() {
   state.hotSeat.timerPauseReason = "";
 }
 
+function recalculateAudiencePoll() {
+  const poll = state.hotSeat.audiencePoll;
+  if (!poll) return;
+  poll.totalVotes = poll.counts.reduce((sum, value) => sum + value, 0);
+  if (!poll.totalVotes) {
+    poll.percentages = poll.counts.map(() => 0);
+    return;
+  }
+  poll.percentages = poll.counts.map((value) => Math.round((value / poll.totalVotes) * 100));
+}
+
+function closeAudiencePoll() {
+  if (!state.hotSeat.audiencePoll) return;
+  state.hotSeat.audiencePoll.status = "closed";
+}
+
+function lockAudiencePoll() {
+  if (!state.hotSeat.audiencePoll || state.hotSeat.audiencePoll.status !== "open") return false;
+  recalculateAudiencePoll();
+  state.hotSeat.audiencePoll.status = "locked";
+  state.notice = "Audience poll locked.";
+  return true;
+}
+
+function setHotSeatQuestionSet(questionSetKey) {
+  if (!HOT_SEAT_BANKS[questionSetKey]) return false;
+  if (state.phase === "hotseat" && state.hotSeat.status !== "ended") return false;
+  state.hotSeat.questionSetKey = questionSetKey;
+  state.notice = `${getHotSeatBank(questionSetKey).label} selected.`;
+  return true;
+}
+
 function applyHotSeatLifeline(kind) {
   const question = getHotSeatQuestion();
   if (!question) return;
@@ -587,14 +702,16 @@ function applyHotSeatLifeline(kind) {
   }
 
   if (kind === "Audience Poll") {
-    const poll = question.options.map((_, index) => {
-      if (index === question.answerIndex) return 45 + Math.floor(Math.random() * 21);
-      return 5 + Math.floor(Math.random() * 21);
-    });
-    const total = poll.reduce((sum, value) => sum + value, 0);
-    state.hotSeat.audiencePoll = poll.map((value) => Math.round((value / total) * 100));
+    state.hotSeat.audiencePoll = {
+      status: "open",
+      questionId: question.id,
+      counts: question.options.map(() => 0),
+      totalVotes: 0,
+      percentages: question.options.map(() => 0),
+      voters: {}
+    };
     pauseHotSeatTimer("Audience Poll");
-    state.notice = "Audience poll ready.";
+    state.notice = "Audience poll live.";
   }
 
   if (kind === "Call a Friend") {
@@ -605,7 +722,7 @@ function applyHotSeatLifeline(kind) {
 }
 
 function moveToNextHotSeatQuestion() {
-  if (state.hotSeat.questionIndex >= QUESTION_BANK.hotSeat.length - 1) {
+  if (state.hotSeat.questionIndex >= getHotSeatBank().questions.length - 1) {
     finishHotSeatTurn("completed");
     return;
   }
@@ -632,6 +749,7 @@ function finishHotSeatTurn(reason) {
   }
 
   state.hotSeat.status = "ended";
+  state.hotSeat.audiencePoll = null;
   clearHotSeatTimer();
   state.phase = "intermission";
   state.notice = reason === "completed"
@@ -646,6 +764,7 @@ function revealHotSeatAnswer(reason = "host") {
 
   const selected = state.hotSeat.lockedAnswerIndex;
   const correct = selected === question.answerIndex;
+  closeAudiencePoll();
   state.hotSeat.reveal = correct ? "correct" : "wrong";
   state.hotSeat.revealReason = reason;
 
@@ -665,7 +784,7 @@ function revealHotSeatAnswer(reason = "host") {
     state.notice = `${team.name} correct for ${question.points}.`;
     historyEntry.scoreAfter = state.hotSeat.currentScore;
     state.hotSeat.history.push(historyEntry);
-    if (state.hotSeat.questionIndex >= QUESTION_BANK.hotSeat.length - 1) {
+    if (state.hotSeat.questionIndex >= getHotSeatBank().questions.length - 1) {
       finishHotSeatTurn("completed");
       return;
     }
@@ -707,6 +826,12 @@ function handleHostAction(action, payload = {}, client) {
     case "start-fff":
       startFFF(Number(payload.questionIndex || 0));
       break;
+    case "set-hotseat-question-set":
+      if (!setHotSeatQuestionSet(String(payload.questionSetKey || ""))) {
+        send(client, "error", { message: "Choose a valid Hot Seat question set before starting." });
+        return;
+      }
+      break;
     case "rank-fff":
       rankFFF();
       break;
@@ -729,8 +854,19 @@ function handleHostAction(action, payload = {}, client) {
         send(client, "error", { message: "Hot Seat timer is not paused." });
         return;
       }
+      if (state.hotSeat.timerPauseReason === "Audience Poll" && state.hotSeat.audiencePoll?.status === "open") {
+        send(client, "error", { message: "Lock the audience poll before resuming the timer." });
+        return;
+      }
       resumeHotSeatTimer();
       state.notice = "Hot Seat timer resumed.";
+      break;
+    case "hotseat-lock-audience-poll":
+      if (state.phase !== "hotseat" || state.hotSeat.status !== "question-live" || state.hotSeat.audiencePoll?.status !== "open") {
+        send(client, "error", { message: "Audience poll is not open." });
+        return;
+      }
+      lockAudiencePoll();
       break;
     case "hotseat-next":
       moveToNextHotSeatQuestion();
@@ -777,6 +913,10 @@ function handleHostAction(action, payload = {}, client) {
 }
 
 function handlePlayerMessage(message, client) {
+  if (!client.isPlayerAuthorized) {
+    send(client, "error", { message: "Player password is required." });
+    return;
+  }
   const team = getTeam(client.teamId);
   if (!team) return;
 
@@ -806,6 +946,41 @@ function handlePlayerMessage(message, client) {
   }
 }
 
+function handleAudiencePollMessage(message, client) {
+  if (message.type !== "audience-vote") return false;
+  const poll = state.hotSeat.audiencePoll;
+  const question = getHotSeatQuestion();
+  if (!poll || poll.status !== "open" || !question) {
+    send(client, "error", { message: "Audience voting is not open right now." });
+    return true;
+  }
+  if (!client.voterId) {
+    send(client, "error", { message: "Audience vote session is missing." });
+    return true;
+  }
+  if (poll.questionId !== question.id) {
+    send(client, "error", { message: "Audience poll has changed. Reload the vote page." });
+    return true;
+  }
+
+  const answerIndex = Number(message.answerIndex);
+  if (!Number.isInteger(answerIndex) || answerIndex < 0 || answerIndex >= question.options.length) {
+    send(client, "error", { message: "Choose a valid audience answer." });
+    return true;
+  }
+
+  const previousVote = poll.voters[client.voterId];
+  if (Number.isInteger(previousVote) && previousVote >= 0 && previousVote < poll.counts.length) {
+    poll.counts[previousVote] = Math.max(0, poll.counts[previousVote] - 1);
+  }
+  poll.voters[client.voterId] = answerIndex;
+  poll.counts[answerIndex] += 1;
+  recalculateAudiencePoll();
+  state.notice = `Audience votes: ${poll.totalVotes}`;
+  broadcast();
+  return true;
+}
+
 function handleMessage(raw, client) {
   let message;
   try {
@@ -825,6 +1000,8 @@ function handleMessage(raw, client) {
 
   if (message.type === "hello") {
     client.role = message.role || "viewer";
+    client.voterId = message.voterId ? String(message.voterId) : client.voterId || "";
+    client.isPlayerAuthorized = client.role === "player" ? String(message.playerPin || "") === PLAYER_PIN : false;
     send(client, "state", buildStateForClient(client));
     return;
   }
@@ -833,11 +1010,27 @@ function handleMessage(raw, client) {
     if (String(message.pin || "") === ADMIN_PIN) {
       client.isHost = true;
       client.role = "host";
-    state.notice = "Host ready.";
+      state.notice = "Host ready.";
       broadcast();
       return;
     }
     send(client, "error", { message: "Incorrect admin PIN." });
+    return;
+  }
+
+  if (message.type === "player-auth") {
+    if (String(message.pin || "") === PLAYER_PIN) {
+      client.isPlayerAuthorized = true;
+      client.role = "player";
+      send(client, "player-authenticated", {});
+      send(client, "state", buildStateForClient(client));
+      return;
+    }
+    send(client, "error", { message: "Incorrect player password." });
+    return;
+  }
+
+  if (client.role === "audience-poll" && handleAudiencePollMessage(message, client)) {
     return;
   }
 
@@ -900,6 +1093,7 @@ function serveStatic(request, response) {
   const routeMap = {
     "/": "index.html",
     "/play": "play.html",
+    "/audience-poll": "audience-poll.html",
     "/host": "host.html",
     "/screen": "screen.html",
     "/hotseat-host": "hotseat-host.html",
@@ -958,7 +1152,9 @@ server.on("upgrade", (request, socket) => {
     socket,
     role: "viewer",
     isHost: false,
+    isPlayerAuthorized: false,
     teamId: null,
+    voterId: "",
     buffer: Buffer.alloc(0)
   };
 

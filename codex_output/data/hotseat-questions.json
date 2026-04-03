@@ -1,0 +1,74 @@
+[
+  {
+    "id": "hot-1",
+    "points": 10,
+    "topic": "General Knowledge",
+    "question": "Which gas do plants mainly absorb from the atmosphere for photosynthesis?",
+    "options": ["Oxygen", "Nitrogen", "Carbon dioxide", "Hydrogen"],
+    "answerIndex": 2
+  },
+  {
+    "id": "hot-2",
+    "points": 20,
+    "topic": "Science",
+    "question": "What is the boiling point of water at sea level in degrees Celsius?",
+    "options": ["90", "95", "100", "110"],
+    "answerIndex": 2
+  },
+  {
+    "id": "hot-3",
+    "points": 50,
+    "topic": "India",
+    "question": "Which is the capital city of India?",
+    "options": ["Mumbai", "New Delhi", "Kolkata", "Chennai"],
+    "answerIndex": 1
+  },
+  {
+    "id": "hot-4",
+    "points": 100,
+    "topic": "Mathematics",
+    "question": "How many sides does a hexagon have?",
+    "options": ["5", "6", "7", "8"],
+    "answerIndex": 1
+  },
+  {
+    "id": "hot-5",
+    "points": 500,
+    "topic": "Technology",
+    "question": "What does HTTP stand for?",
+    "options": ["HyperText Transfer Protocol", "HighText Transfer Protocol", "Hyper Transfer Text Process", "Host Transfer Text Protocol"],
+    "answerIndex": 0
+  },
+  {
+    "id": "hot-6",
+    "points": 1000,
+    "topic": "Geography",
+    "question": "Which is the longest river in the world?",
+    "options": ["Amazon", "Nile", "Yangtze", "Mississippi"],
+    "answerIndex": 1
+  },
+  {
+    "id": "hot-7",
+    "points": 2000,
+    "topic": "History",
+    "question": "Who was the first President of independent India?",
+    "options": ["Jawaharlal Nehru", "Dr. Rajendra Prasad", "Sardar Patel", "Dr. S. Radhakrishnan"],
+    "answerIndex": 1
+  },
+  {
+    "id": "hot-8",
+    "points": 3000,
+    "topic": "Space",
+    "question": "Which planet is known for having the most prominent ring system?",
+    "options": ["Jupiter", "Saturn", "Uranus", "Neptune"],
+    "answerIndex": 1
+  },
+  {
+    "id": "hot-9",
+    "points": 4000,
+    "topic": "Constitution",
+    "question": "How many Fundamental Rights are currently guaranteed by the Constitution of India?",
+    "options": ["5", "6", "7", "8"],
+    "answerIndex": 1
+  }
+]

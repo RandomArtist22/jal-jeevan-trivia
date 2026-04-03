@@ -11,13 +11,18 @@ const ui = {
   flash: "",
   flashType: "idle",
   teamId: localStorage.getItem("jal_jeevan_team_id") || "",
+  playerPin: sessionStorage.getItem("jal_jeevan_player_pin") || "",
+  pendingPlayerPin: "",
+  audienceVoterId: localStorage.getItem("jal_jeevan_audience_voter_id") || crypto.randomUUID(),
   renderedAt: 0,
   screeningQuestionIndex: 0,
   hostSection: "stage",
   hotSeatSection: "control",
   teamPage: 0,
+  pendingScreeningAnswers: {},
   fffDraftQuestionKey: "",
-  fffDraftOrder: []
+  fffDraftOrder: [],
+  fffSubmitting: false
 };
 
 function escapeHtml(value) {
@@ -37,12 +42,16 @@ function getState() {
     qualifiers: [],
     completedHotSeatTeams: [],
     privateTeam: null,
-    session: {},
-    config: { safeLevels: [], hotSeatLadder: [] },
+    session: { canPlay: false, audienceVoteIndex: -1 },
+    config: { publicBaseUrl: "", safeLevels: [], hotSeatLadder: [] },
     screening: { questions: [], responses: {}, rankings: [] },
     fff: { ranked: [], eligibleTeams: [], mySubmission: null },
-    hotSeat: { lifelinesUsed: [], reducedOptionIndices: [], history: [] }
+    hotSeat: { lifelinesUsed: [], reducedOptionIndices: [], history: [], audiencePoll: null }
   };
+}
+
+if (!localStorage.getItem("jal_jeevan_audience_voter_id")) {
+  localStorage.setItem("jal_jeevan_audience_voter_id", ui.audienceVoterId);
 }
 
 function getTeam(teamId) {
@@ -74,8 +83,13 @@ function connect() {
   ui.socket = new WebSocket(`${protocol}://${window.location.host}`);
 
   ui.socket.addEventListener("open", () => {
-    send({ type: "hello", role: page });
-    if (page === "player" && ui.teamId) {
+    send({
+      type: "hello",
+      role: page,
+      playerPin: page === "player" ? ui.playerPin : "",
+      voterId: page === "audience-poll" ? ui.audienceVoterId : ""
+    });
+    if (page === "player" && ui.teamId && ui.playerPin) {
       send({ type: "reconnect-team", teamId: ui.teamId });
     }
     syncClock();
@@ -98,6 +112,17 @@ function connect() {
       return;
     }
 
+    if (message.type === "player-authenticated") {
+      ui.playerPin = ui.pendingPlayerPin || ui.playerPin;
+      ui.pendingPlayerPin = "";
+      sessionStorage.setItem("jal_jeevan_player_pin", ui.playerPin);
+      if (ui.teamId) {
+        send({ type: "reconnect-team", teamId: ui.teamId });
+      }
+      pushFlash("Player access unlocked.", "active");
+      return;
+    }
+
     if (message.type === "sync") {
       const now = Date.now();
       const midpoint = Number(message.payload.clientTime) + (now - Number(message.payload.clientTime)) / 2;
@@ -109,6 +134,9 @@ function connect() {
     }
 
     if (message.type === "error") {
+      ui.pendingScreeningAnswers = {};
+      ui.fffSubmitting = false;
+      ui.pendingPlayerPin = "";
       pushFlash(message.payload.message, "danger");
     }
   });
@@ -130,6 +158,16 @@ function formatMs(ms) {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
+function formatElapsedMs(ms) {
+  if (!Number.isFinite(ms) || ms < 0) return "--";
+  if (ms >= 60000) {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = ((ms % 60000) / 1000).toFixed(2).padStart(5, "0");
+    return `${minutes}:${seconds}`;
+  }
+  return `${(ms / 1000).toFixed(2)}s`;
+}
+
 function prettyDate(timestamp) {
   if (!timestamp || !Number.isFinite(timestamp)) return "--";
   return new Date(timestamp).toLocaleTimeString([], {
@@ -149,7 +187,61 @@ function clamp(value, min, max) {
 }
 
 function routeUrl(path = "") {
-  return `${window.location.origin}${path}`;
+  const publicBaseUrl = String(getState().config?.publicBaseUrl || "").trim().replace(/\/+$/, "");
+  const origin = publicBaseUrl || window.location.origin;
+  return `${origin}${path}`;
+}
+
+function qrCodeUrl(value) {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(value)}`;
+}
+
+function getLoadingMeta() {
+  switch (page) {
+    case "player":
+      return {
+        eyebrow: "Player Portal",
+        title: "Loading Team Dashboard",
+        copy: "Connecting this device to the quiz server and restoring the team session."
+      };
+    case "host":
+      return {
+        eyebrow: "Operator Console",
+        title: "Loading Quiz Controls",
+        copy: "Fetching registrations, round status, and operator controls."
+      };
+    case "screen":
+      return {
+        eyebrow: "Quiz Screen",
+        title: "Loading Projector View",
+        copy: "Preparing the live stage view for screening and Fastest Finger First."
+      };
+    case "hotseat-host":
+      return {
+        eyebrow: "Hot Seat Operator",
+        title: "Loading Hot Seat Controls",
+        copy: "Syncing the active team, question state, and timer controls."
+      };
+    case "hotseat-screen":
+      return {
+        eyebrow: "Hot Seat Screen",
+        title: "Loading Projector View",
+        copy: "Preparing the dedicated Hot Seat projector feed."
+      };
+    case "audience-poll":
+      return {
+        eyebrow: "Audience Poll",
+        title: "Loading Vote Page",
+        copy: "Connecting this device to the live audience poll."
+      };
+    case "home":
+    default:
+      return {
+        eyebrow: "Jal Jeevan Trivia",
+        title: "Loading Router",
+        copy: "Collecting the current routes and event state."
+      };
+  }
 }
 
 function phaseLabel(phase) {
@@ -380,6 +472,96 @@ function renderCompactHeader({ eyebrow, title, right = "", chips = [] }) {
   `;
 }
 
+function renderLoadingShell() {
+  const meta = getLoadingMeta();
+  return renderCompactShell(
+    renderCompactHeader({
+      eyebrow: meta.eyebrow,
+      title: meta.title,
+      chips: [{ value: "Connecting" }]
+    }),
+    `
+      <div class="loading-grid">
+        <section class="glass-card compact-card loading-card">
+          <div class="loading-stack">
+            <div class="loading-bar short"></div>
+            <div class="loading-bar medium"></div>
+            <div class="loading-bar full"></div>
+            <div class="loading-bar full"></div>
+            <div class="loading-bar tall"></div>
+          </div>
+        </section>
+        <aside class="loading-stack">
+          <section class="glass-card compact-card loading-card">
+            <span class="kicker">Status</span>
+            <p class="helper-copy">${escapeHtml(meta.copy)}</p>
+            <div class="loading-bar full"></div>
+          </section>
+          <section class="glass-card compact-card loading-card">
+            <span class="kicker">Live Feed</span>
+            <div class="loading-bar medium"></div>
+            <div class="loading-bar full"></div>
+            <div class="loading-bar medium"></div>
+          </section>
+        </aside>
+      </div>
+    `,
+    "loading-shell"
+  );
+}
+
+function renderPlayerUnlock() {
+  return renderCompactShell(
+    renderCompactHeader({
+      eyebrow: "Player Portal",
+      title: "Enter Player Password",
+      chips: [{ value: routeUrl("/play") }]
+    }),
+    `
+      <div class="compact-grid compact-grid-2">
+        <form class="glass-card compact-card compact-stack" data-form="player-auth">
+          <div class="field">
+            <label for="player-pin">Player Password</label>
+            <input id="player-pin" name="pin" type="password" required autocomplete="current-password" placeholder="Enter player password" />
+          </div>
+          <button class="button" type="submit">Unlock Player Access</button>
+          ${flashMarkup()}
+        </form>
+        <section class="glass-card compact-card player-briefing player-briefing-static">
+          <div class="player-briefing-copy">
+            <span class="kicker">Protected Access</span>
+            <h2 class="player-briefing-title">Screening and FFF only</h2>
+            <p class="helper-copy">This endpoint is locked so only approved participant devices can register teams and answer questions.</p>
+          </div>
+          <div class="player-briefing-facts">
+            <div class="compact-stat">
+              <span class="kicker">Use Here</span>
+              <strong>Team answers</strong>
+            </div>
+            <div class="compact-stat">
+              <span class="kicker">Not Here</span>
+              <strong>Hot Seat play</strong>
+            </div>
+          </div>
+        </section>
+      </div>
+    `,
+    "player-compact"
+  );
+}
+
+function renderAudienceQrCard(pollUrl, options = {}) {
+  const cardClass = options.compact ? "glass-card compact-card audience-qr-card audience-qr-card-compact" : "glass-card compact-card audience-qr-card";
+  if (!pollUrl) return "";
+  return `
+    <section class="${cardClass}">
+      <span class="kicker">Audience Voting</span>
+      <img class="audience-qr-image" src="${escapeHtml(qrCodeUrl(pollUrl))}" alt="QR code for audience poll voting" loading="lazy" />
+      <strong class="mono">${escapeHtml(pollUrl)}</strong>
+    </section>
+  `;
+}
+
 function renderSegmentedControl(action, active, options) {
   return `
     <div class="segmented-control" role="tablist">
@@ -421,6 +603,28 @@ function renderMiniRanking(rankings, title = "Ranking", limit = 6) {
       </div>
       ${renderHostRanking(rankings.slice(0, limit))}
     </article>
+  `;
+}
+
+function getFFFElapsedMs(entry, startedAt) {
+  const baseTime = Number(entry?.receivedAt || entry?.submittedAt || 0);
+  if (!Number.isFinite(startedAt) || !Number.isFinite(baseTime) || !startedAt || !baseTime || baseTime >= Number.MAX_SAFE_INTEGER / 2) {
+    return null;
+  }
+  return Math.max(0, baseTime - startedAt);
+}
+
+function renderFFFResultMeta(entry, startedAt) {
+  const elapsed = getFFFElapsedMs(entry, startedAt);
+  const resultLabel = entry.correct === undefined ? "Pending" : entry.correct ? "Correct" : "Wrong";
+  if (elapsed === null) {
+    return `<span>${escapeHtml(resultLabel)}</span>`;
+  }
+  return `
+    <div class="leaderboard-meta">
+      <span class="leaderboard-result">${escapeHtml(resultLabel)}</span>
+      <span class="leaderboard-time mono">${escapeHtml(formatElapsedMs(elapsed))}</span>
+    </div>
   `;
 }
 
@@ -560,6 +764,15 @@ function getFFFQuestionKey(question) {
 }
 
 function syncLocalUiFromState(state) {
+  const liveResponses = state.screening.responses || {};
+  ui.pendingScreeningAnswers = state.screening.status === "active"
+    ? Object.fromEntries(
+        Object.entries(ui.pendingScreeningAnswers).filter(([questionId, answerIndex]) => liveResponses[questionId] !== Number(answerIndex))
+      )
+    : {};
+  if (state.fff.mySubmission || state.fff.status !== "active") {
+    ui.fffSubmitting = false;
+  }
   ui.screeningQuestionIndex = clamp(ui.screeningQuestionIndex || 0, 0, Math.max(0, state.screening.questions.length - 1));
   ui.teamPage = clamp(ui.teamPage || 0, 0, Math.max(0, Math.ceil(Math.max(1, state.teams.length) / 6) - 1));
 
@@ -598,6 +811,48 @@ function renderCompactRows(rows, emptyLabel = "Nothing yet.") {
         )
         .join("")}
     </div>
+  `;
+}
+
+function getFrozenRemainingMs(endAt, pivotAt = serverNow()) {
+  const end = Number(endAt || 0);
+  const pivot = Number(pivotAt || 0);
+  if (!end || !Number.isFinite(end)) return 0;
+  if (!pivot || !Number.isFinite(pivot)) return Math.max(0, end - serverNow());
+  return Math.max(0, end - pivot);
+}
+
+function renderPlayerBriefing(state, team) {
+  const instruction = getPlayerInstruction(state, team);
+  const roleLabel = team.isAudience ? "Audience Entry" : "Registered Team";
+  const actionLabel = state.phase === "screening"
+    ? "Answer on this device"
+    : state.phase === "fff"
+      ? "Build the order here"
+      : "Watch the stage";
+
+  return `
+    <section class="glass-card compact-card player-briefing">
+      <div class="player-briefing-copy">
+        <span class="kicker">This Device</span>
+        <h2 class="player-briefing-title">${escapeHtml(actionLabel)}</h2>
+        <p class="helper-copy">${escapeHtml(instruction)}</p>
+      </div>
+      <div class="player-briefing-facts">
+        <div class="compact-stat">
+          <span class="kicker">Entry</span>
+          <strong>${escapeHtml(roleLabel)}</strong>
+        </div>
+        <div class="compact-stat">
+          <span class="kicker">Phase</span>
+          <strong>${escapeHtml(phaseLabel(state.phase))}</strong>
+        </div>
+        <div class="compact-stat">
+          <span class="kicker">Status</span>
+          <strong>${escapeHtml(qualificationLabel(team, state))}</strong>
+        </div>
+      </div>
+    </section>
   `;
 }
 
@@ -680,8 +935,8 @@ function renderTeamList(teams) {
   `;
 }
 
-function screeningQuestionMarkup(question, responses, interactive) {
-  const chosen = responses?.[question.id];
+function screeningQuestionMarkup(question, responses, interactive, pendingAnswerIndex = null) {
+  const chosen = pendingAnswerIndex ?? responses?.[question.id];
   return `
     <article class="question-shell">
       <div class="question-meta">
@@ -692,7 +947,7 @@ function screeningQuestionMarkup(question, responses, interactive) {
       <div class="options-grid">
         ${question.options
           .map((option, index) => {
-            const selected = chosen === index ? "is-selected" : "";
+            const selected = chosen === index ? `is-selected ${pendingAnswerIndex === index ? "is-pending" : ""}` : "";
             const disabled = interactive ? "" : "disabled";
             return `
               <button class="option-card ${selected}" ${disabled} data-action="screening-answer" data-question-id="${escapeHtml(question.id)}" data-answer-index="${index}">
@@ -737,16 +992,23 @@ function renderPlayerRegistration() {
           <button class="button" type="submit">Register</button>
           ${flashMarkup()}
         </form>
-        <div class="glass-card compact-card compact-center">
-          <div class="compact-identity">
-            <span class="kicker">Stage</span>
-            <strong>Screening + FFF</strong>
+        <section class="glass-card compact-card player-briefing player-briefing-static">
+          <div class="player-briefing-copy">
+            <span class="kicker">Participant Role</span>
+            <h2 class="player-briefing-title">One device, one team</h2>
+            <p class="helper-copy">Register here, keep this page open, answer screening, then use the same device for Fastest Finger First if the team qualifies.</p>
           </div>
-          <div class="compact-identity">
-            <span class="kicker">Hot Seat</span>
-            <strong>Operator Only</strong>
+          <div class="player-briefing-facts">
+            <div class="compact-stat">
+              <span class="kicker">Rounds Here</span>
+              <strong>Screening + FFF</strong>
+            </div>
+            <div class="compact-stat">
+              <span class="kicker">Hot Seat</span>
+              <strong>Operator Only</strong>
+            </div>
           </div>
-        </div>
+        </section>
       </div>
     `,
     "player-compact"
@@ -758,7 +1020,23 @@ function renderScreeningPlayer(state, team) {
   const total = state.screening.questions.length;
   const currentIndex = getScreeningQuestionIndex(total);
   const currentQuestion = state.screening.questions[currentIndex];
-  const answered = Object.keys(state.screening.responses || {}).length;
+  const responses = { ...(state.screening.responses || {}), ...ui.pendingScreeningAnswers };
+  const answered = Object.keys(responses).length;
+  const pendingAnswerIndex = currentQuestion ? ui.pendingScreeningAnswers[currentQuestion.id] : null;
+  const currentAnswer = currentQuestion ? responses[currentQuestion.id] : null;
+  const answerStateLabel = pendingAnswerIndex !== null && pendingAnswerIndex !== undefined
+    ? "Saving..."
+    : currentAnswer !== null && currentAnswer !== undefined
+      ? "Saved"
+      : "Open";
+  const screeningTimerMarkup = renderMiniTimer("Round Timer", state.screening.endsAt, state.screening.startedAt, interactive
+    ? {}
+    : {
+        stopped: true,
+        remainingMs: getFrozenRemainingMs(state.screening.endsAt),
+        totalMs: (state.screening.endsAt || 0) - (state.screening.startedAt || 0),
+        reason: state.screening.status === "ended" ? "Round Closed" : "Standby"
+      });
 
   if (!currentQuestion) {
     return `<div class="empty-state">No screening questions</div>`;
@@ -766,13 +1044,23 @@ function renderScreeningPlayer(state, team) {
 
   return `
     <div class="compact-stack">
+      <section class="glass-card compact-card player-action-card">
+        <div class="player-round-head">
+          <div>
+            <span class="kicker">Live Task</span>
+            <h2 class="player-round-title">Choose one answer</h2>
+          </div>
+          <span class="pill ${interactive ? "active" : "pending"}">${interactive ? "Tap To Save" : "Waiting"}</span>
+        </div>
+        <p class="helper-copy">${interactive ? "Each tap saves immediately. Use the arrows to move through the screening questions." : "This round is no longer accepting answers on the player device."}</p>
+        ${screeningTimerMarkup}
+      </section>
       <div class="compact-grid compact-grid-3">
         ${renderCompactStat("Phase", "Screening")}
         ${renderCompactStat("Saved", `${formatNumber(answered)} / ${formatNumber(total)}`)}
-        ${renderCompactStat("Score", state.screening.status === "active" ? "--" : formatNumber(team.screeningScore))}
+        ${renderCompactStat("Answer", answerStateLabel)}
       </div>
-      ${renderMiniTimer("Timer", state.screening.endsAt, state.screening.startedAt)}
-      ${screeningQuestionMarkup(currentQuestion, state.screening.responses, interactive)}
+      ${screeningQuestionMarkup(currentQuestion, state.screening.responses, interactive, pendingAnswerIndex)}
       ${renderCompactPager("screening-page", currentIndex, total)}
     </div>
   `;
@@ -787,16 +1075,58 @@ function renderFFFPlayer(state, team) {
   const submission = state.fff.mySubmission;
   const eligible = state.fff.eligibleTeams.includes(team.id);
   const draftOrder = submission?.order ? [...submission.order] : ui.fffDraftOrder;
-  const disabled = !eligible || state.fff.status !== "active" || Boolean(submission);
+  const disabled = !eligible || state.fff.status !== "active" || Boolean(submission) || ui.fffSubmitting;
   const readyToSubmit = draftOrder.length === question.options.length;
+  const submitLabel = submission ? "Order Locked" : ui.fffSubmitting ? "Submitting..." : "Submit Order";
+  const submitFreezeAt = submission?.receivedAt || submission?.submittedAt || serverNow();
+  const fffTimerMarkup = renderMiniTimer("FFF Timer", state.fff.endsAt, state.fff.startedAt, ui.fffSubmitting
+    ? {
+        paused: true,
+        remainingMs: getFrozenRemainingMs(state.fff.endsAt),
+        totalMs: (state.fff.endsAt || 0) - (state.fff.startedAt || 0),
+        reason: "Submitting"
+      }
+    : submission
+      ? {
+          stopped: true,
+          remainingMs: getFrozenRemainingMs(state.fff.endsAt, submitFreezeAt),
+          totalMs: (state.fff.endsAt || 0) - (state.fff.startedAt || 0),
+          reason: "Locked"
+        }
+      : !eligible
+        ? {
+            stopped: true,
+            remainingMs: 0,
+            totalMs: (state.fff.endsAt || 0) - (state.fff.startedAt || 0),
+            reason: "Watch Screen"
+          }
+        : state.fff.status !== "active"
+          ? {
+              stopped: true,
+              remainingMs: getFrozenRemainingMs(state.fff.endsAt),
+              totalMs: (state.fff.endsAt || 0) - (state.fff.startedAt || 0),
+              reason: "Closed"
+            }
+          : {});
   return `
     <div class="compact-stack">
+      <section class="glass-card compact-card player-action-card">
+        <div class="player-round-head">
+          <div>
+            <span class="kicker">Live Task</span>
+            <h2 class="player-round-title">${eligible ? "Build the correct order" : "Stage in progress"}</h2>
+          </div>
+          <span class="pill ${submission ? "pending" : eligible && state.fff.status === "active" ? "active" : "idle"}">${submission ? "Order Saved" : eligible && state.fff.status === "active" ? "Answer Now" : "Standby"}</span>
+        </div>
+        <p class="helper-copy">${submission ? "This team has already submitted. The timer is frozen locally while the host ranks the answers." : eligible ? "Tap the choices in the correct sequence. Each option can be used only once." : "This device is not active for the current Fastest Finger First pool."}</p>
+        ${fffTimerMarkup}
+      </section>
       <div class="compact-grid compact-grid-3">
         ${renderCompactStat("Phase", "FFF")}
         ${renderCompactStat("Status", state.fff.status)}
         ${renderCompactStat("Picked", `${formatNumber(draftOrder.length)} / ${formatNumber(question.options.length)}`)}
       </div>
-      ${renderMiniTimer("Timer", state.fff.endsAt, state.fff.startedAt)}
+      ${ui.fffSubmitting ? `<div class="pill pending" role="status" aria-live="polite">Submitting order...</div>` : ""}
       <section class="question-shell compact-question-shell">
         <div class="panel-title-row">
           <h2 class="section-title">Fastest Finger First</h2>
@@ -830,7 +1160,7 @@ function renderFFFPlayer(state, team) {
               <form class="compact-stack" data-form="fff-submit">
                 <div class="inline-actions tight">
                   <button class="ghost-button compact-button" type="button" data-ui-action="fff-reset" ${disabled || !draftOrder.length ? "disabled" : ""}>Reset</button>
-                  <button class="button" type="submit" ${disabled || !readyToSubmit ? "disabled" : ""}>Submit Order</button>
+                  <button class="button" type="submit" ${disabled || !readyToSubmit ? "disabled" : ""}>${submitLabel}</button>
                 </div>
               </form>
             `
@@ -851,24 +1181,47 @@ function optionStateClass(index, question, hotSeat) {
   return classes.join(" ");
 }
 
-function renderAudiencePoll(hotSeat, question) {
+function renderAudiencePoll(hotSeat, question, options = {}) {
   if (!hotSeat.audiencePoll || !question) return "";
+  const poll = hotSeat.audiencePoll;
+  const pollUrl = routeUrl("/audience-poll");
+  const showQr = Boolean(options.showQr && poll.status === "open");
+  const showResults = poll.status !== "open";
+  const wrapperClass = [
+    options.flat ? "compact-stack" : "glass-card compact-card",
+    "audience-poll-panel",
+    showResults ? "audience-poll-panel-results" : "",
+    options.projector ? "audience-poll-panel-projector" : ""
+  ].filter(Boolean).join(" ");
   return `
-    <div class="glass-card stack">
-      <h3>Audience Poll</h3>
-      <div class="score-ladder">
-        ${question.options
-          .map(
-            (option, index) => `
-              <div class="score-step">
-                <span class="option-key">${LETTERS[index]}</span>
-                <span>${escapeHtml(option)}</span>
-                <strong>${hotSeat.audiencePoll[index] || 0}%</strong>
-              </div>
-            `
-          )
-          .join("")}
+    <div class="${wrapperClass}">
+      <div class="panel-title-row">
+        <h3>Audience Poll</h3>
+        <span class="pill ${poll.status === "open" ? "active" : "pending"}">${escapeHtml(poll.status)}</span>
       </div>
+      <div class="compact-grid compact-grid-1">
+        ${renderCompactStat("State", poll.status === "open" ? "Accepting votes" : poll.status === "locked" ? "Results ready" : "Voting closed")}
+      </div>
+      ${showQr ? renderAudienceQrCard(pollUrl, { compact: Boolean(options.compactQr) }) : ""}
+      ${
+        showResults
+          ? `
+            <div class="score-ladder">
+              ${question.options
+                .map(
+                  (option, index) => `
+                    <div class="score-step audience-result-step">
+                      <span class="option-key">${LETTERS[index]}</span>
+                      <span>${escapeHtml(option)}</span>
+                      <strong>${formatNumber(poll.percentages?.[index] || 0)}%</strong>
+                    </div>
+                  `
+                )
+                .join("")}
+            </div>
+          `
+          : `<div class="status-callout idle"><strong>Voting Live</strong><p>Results stay hidden until the operator locks the audience poll.</p></div>`
+      }
     </div>
   `;
 }
@@ -892,6 +1245,10 @@ function renderPlayer() {
   const state = getState();
   const team = state.privateTeam;
 
+  if (!state.session.canPlay) {
+    return renderPlayerUnlock();
+  }
+
   if (!team) {
     return renderPlayerRegistration();
   }
@@ -911,7 +1268,7 @@ function renderPlayer() {
   return renderCompactShell(
     renderCompactHeader({
       eyebrow: `Player · ${team.name}`,
-      title: "Team Dashboard",
+      title: "Participant Console",
       right: `<div class="inline-actions"><button class="ghost-button compact-button" data-action="reset-player-session">Reset</button><a class="ghost-button compact-button" href="/">Home</a></div>`,
       chips: [
         { value: phaseLabel(state.phase) },
@@ -921,6 +1278,7 @@ function renderPlayer() {
       ]
     }),
     `
+      ${renderPlayerBriefing(state, team)}
       <div class="compact-grid compact-grid-3">
         ${renderCompactStat("Members", team.members)}
         ${renderCompactStat("Screening", formatNumber(team.screeningScore))}
@@ -933,6 +1291,73 @@ function renderPlayer() {
   );
 }
 
+function renderAudiencePollPage() {
+  const state = getState();
+  const poll = state.hotSeat.audiencePoll;
+  const question = state.hotSeat.question;
+  const selectedIndex = Number(state.session.audienceVoteIndex ?? -1);
+  const voteOpen = state.phase === "hotseat" && poll?.status === "open" && question;
+
+  return renderCompactShell(
+    renderCompactHeader({
+      eyebrow: "Audience Poll",
+      title: voteOpen ? "Cast Your Vote" : "Waiting For Poll",
+      chips: [
+        { value: state.hotSeat.activeTeam?.name || "Standby" },
+        { value: voteOpen ? "Voting Open" : "Standby" }
+      ]
+    }),
+    voteOpen
+      ? `
+          <div class="compact-grid compact-grid-main">
+            <section class="question-shell compact-question-shell">
+              <div class="panel-title-row">
+                <h2 class="section-title">${escapeHtml(question.topic || "Audience Poll")}</h2>
+                <span class="pill active">Live</span>
+              </div>
+              <p class="question-text">${escapeHtml(question.question)}</p>
+              <div class="options-grid">
+                ${question.options
+                  .map(
+                    (option, index) => `
+                      <button class="option-card ${selectedIndex === index ? "is-selected" : ""}" type="button" data-action="audience-vote" data-answer-index="${index}">
+                        <span class="option-key">${LETTERS[index]}</span>
+                        <span class="option-copy">${escapeHtml(option)}</span>
+                      </button>
+                    `
+                  )
+                  .join("")}
+              </div>
+            </section>
+            <aside class="compact-sidebar">
+              <article class="glass-card compact-card compact-stack">
+                <h3>How It Works</h3>
+                <p class="helper-copy">Tap one answer. You can change your vote while the poll is open. The Hot Seat screen updates live.</p>
+                ${selectedIndex >= 0 ? `<div class="pill active">Vote saved: ${escapeHtml(LETTERS[selectedIndex])}</div>` : `<div class="pill idle">No vote yet</div>`}
+              </article>
+              <article class="glass-card compact-card compact-stack">
+                <h3>Live Count</h3>
+                ${renderAudiencePoll(state.hotSeat, question, { flat: true })}
+              </article>
+            </aside>
+          </div>
+        `
+      : `
+          <div class="compact-grid compact-grid-2">
+            <section class="glass-card compact-card compact-center">
+              <span class="kicker">Audience Device</span>
+              <strong>Voting opens only when the operator starts the Audience Poll lifeline.</strong>
+            </section>
+            <section class="glass-card compact-card compact-stack">
+              <h3>Status</h3>
+              <p class="helper-copy">${escapeHtml(state.phase === "hotseat" ? "No audience poll is active yet. Watch the Hot Seat screen for the QR code." : "Hot Seat is not active right now. Come back when the operator opens an audience vote.")}</p>
+            </section>
+          </div>
+        `,
+    "screen-compact projector-roomy"
+  );
+}
+
 function renderHostRanking(rankings) {
   if (!rankings.length) return `<div class="empty-state">No ranking data yet.</div>`;
   return `
@@ -940,11 +1365,14 @@ function renderHostRanking(rankings) {
       ${rankings
         .map((entry, index) => {
           const team = getTeam(entry.teamId);
+          const meta = entry.score !== undefined
+            ? `<span>${formatNumber(entry.score)}</span>`
+            : renderFFFResultMeta(entry, getState().fff.startedAt);
           return `
             <div class="score-step ${index === 0 ? "active" : ""}">
               <strong>#${index + 1}</strong>
               <span>${escapeHtml(team?.name || entry.teamId)}</span>
-              <span>${entry.correct === undefined ? formatNumber(entry.score) : entry.correct ? "Correct" : "Incorrect"}</span>
+              ${meta}
             </div>
           `;
         })
@@ -976,7 +1404,7 @@ function renderHost() {
     html: `
       <strong>#${index + 1}</strong>
       <span>${escapeHtml(getTeam(entry.teamId)?.name || entry.teamId)}</span>
-      <span>${entry.correct === undefined ? formatNumber(entry.score) : entry.correct ? "Correct" : "Wrong"}</span>
+      ${renderFFFResultMeta(entry, state.fff.startedAt)}
     `
   }));
   const teamSummary = renderCompactTeamPage(state.teams);
@@ -1155,6 +1583,13 @@ function renderScreen() {
       <span>${formatNumber(entry.score)}</span>
     `
   }));
+  const fffRows = state.fff.ranked.slice(0, 6).map((entry, index) => ({
+    html: `
+      <strong>#${index + 1}</strong>
+      <span>${escapeHtml(getTeam(entry.teamId)?.name || entry.teamId)}</span>
+      ${renderFFFResultMeta(entry, state.fff.startedAt)}
+    `
+  }));
   const scoreRows = state.teams
     .slice()
     .sort((left, right) => right.score - left.score || right.screeningScore - left.screeningScore)
@@ -1171,16 +1606,7 @@ function renderScreen() {
     <div class="glass-card compact-card compact-center compact-screen-card">
       <span class="kicker">Ready</span>
       <strong class="screen-title">Quiz Screen</strong>
-      <div class="compact-endpoints">
-        <div class="compact-endpoint">
-          <span class="kicker">Play</span>
-          <strong class="mono">${escapeHtml(routeUrl("/play"))}</strong>
-        </div>
-        <div class="compact-endpoint">
-          <span class="kicker">Host</span>
-          <strong class="mono">${escapeHtml(routeUrl("/host"))}</strong>
-        </div>
-      </div>
+      <p class="helper-copy">Project this page for screening and Fastest Finger First.</p>
     </div>
   `;
 
@@ -1248,20 +1674,17 @@ function renderScreen() {
         ${mainPanel}
         <aside class="compact-sidebar">
           <article class="glass-card compact-card compact-stack">
-            <h3>${state.phase === "screening" ? "Screening Rank" : "Leaderboard"}</h3>
-            ${renderCompactRows(state.phase === "screening" ? screeningRows : scoreRows, "No ranking yet.")}
+            <h3>${state.phase === "screening" ? "Screening Rank" : state.phase === "fff" ? "FFF Rank" : "Leaderboard"}</h3>
+            ${renderCompactRows(state.phase === "screening" ? screeningRows : state.phase === "fff" ? fffRows : scoreRows, "No ranking yet.")}
           </article>
           <article class="glass-card compact-card compact-stack">
-            <h3>Hot Seat</h3>
-            <div class="compact-kv">
-              <div class="compact-kv-row"><span class="kicker">Host</span><strong class="mono">${escapeHtml(routeUrl("/hotseat-host"))}</strong></div>
-              <div class="compact-kv-row"><span class="kicker">Screen</span><strong class="mono">${escapeHtml(routeUrl("/hotseat-screen"))}</strong></div>
-            </div>
+            <h3>Stage Notice</h3>
+            <p class="helper-copy">${escapeHtml(getScreenInstruction(state))}</p>
           </article>
         </aside>
       </div>
     `,
-    "screen-compact"
+    "screen-compact projector-roomy"
   );
 }
 
@@ -1269,14 +1692,20 @@ function renderHotSeatHost() {
   const state = getState();
   const hotSeat = state.hotSeat;
   const hotSeatWinner = getTeam(state.fff.winnerTeamId);
+  const activeHotSeatSet = state.config.hotSeatQuestionSets?.find((set) => set.key === hotSeat.questionSetKey);
   const canStartWinner = Boolean(state.fff.winnerTeamId);
   const canStartManual = state.teams.length > 0;
+  const canChangeQuestionSet = state.phase !== "hotseat";
   const canSelectAnswer = state.phase === "hotseat" && hotSeat.status === "question-live" && hotSeat.question;
   const canLockAnswer = canSelectAnswer && hotSeat.selectedAnswerIndex !== null;
   const canRevealAnswer = hotSeat.status === "locked";
   const canNextQuestion = hotSeat.status === "revealed";
   const canEndTurn = state.phase === "hotseat";
-  const canResumeTimer = state.phase === "hotseat" && hotSeat.status === "question-live" && hotSeat.timerState === "paused";
+  const canResumeTimer = state.phase === "hotseat"
+    && hotSeat.status === "question-live"
+    && hotSeat.timerState === "paused"
+    && hotSeat.audiencePoll?.status !== "open";
+  const canLockAudiencePoll = state.phase === "hotseat" && hotSeat.status === "question-live" && hotSeat.audiencePoll?.status === "open";
   const hotSeatTimerMarkup = renderMiniTimer("Answer", hotSeat.endsAt, hotSeat.startedAt, {
     paused: hotSeat.timerState === "paused",
     stopped: hotSeat.timerState === "stopped",
@@ -1323,7 +1752,7 @@ function renderHotSeatHost() {
           ${routeTiles}
         </div>
       `,
-      "operator-compact"
+      "operator-compact hotseat-roomy"
     );
   }
 
@@ -1335,10 +1764,26 @@ function renderHotSeatHost() {
           <span class="pill ${state.phase === "hotseat" ? "active" : hotSeatWinner ? "pending" : "idle"}">${escapeHtml(state.phase === "hotseat" ? hotSeat.status : hotSeatWinner ? "ready" : "standby")}</span>
         </div>
         <div class="compact-kv">
+          <div class="compact-kv-row"><span class="kicker">Question Set</span><strong>${escapeHtml(activeHotSeatSet?.label || hotSeat.questionSetKey || "--")}</strong></div>
           <div class="compact-kv-row"><span class="kicker">FFF Winner</span><strong>${escapeHtml(hotSeatWinner?.name || "--")}</strong></div>
           <div class="compact-kv-row"><span class="kicker">Current Team</span><strong>${escapeHtml(hotSeat.activeTeam?.name || "--")}</strong></div>
           <div class="compact-kv-row"><span class="kicker">Completed</span><strong>${formatNumber(state.completedHotSeatTeams?.length || 0)}</strong></div>
         </div>
+        <form class="compact-form-row" data-form="hotseat-question-set">
+          <div class="field">
+            <label for="hotseat-question-set">Question Set</label>
+            <select class="compact-select" id="hotseat-question-set" name="questionSetKey" autocomplete="off" ${canChangeQuestionSet ? "" : "disabled"}>
+              ${(state.config.hotSeatQuestionSets || [])
+                .map(
+                  (set) => `
+                    <option value="${escapeHtml(set.key)}" ${hotSeat.questionSetKey === set.key ? "selected" : ""}>${escapeHtml(set.label)} · ${formatNumber(set.count)} Q</option>
+                  `
+                )
+                .join("")}
+            </select>
+          </div>
+          <button class="ghost-button compact-button" type="button" data-host-action="set-hotseat-question-set" ${canChangeQuestionSet ? "" : "disabled"}>Apply Set</button>
+        </form>
         <div class="inline-actions tight">
           <button class="button compact-button" type="button" data-host-action="send-fff-winner-to-hotseat" ${canStartWinner ? "" : "disabled"}>Start Winner</button>
           <a class="ghost-button compact-button" href="/hotseat-screen">Projector</a>
@@ -1401,6 +1846,7 @@ function renderHotSeatHost() {
                       `
                     )
                     .join("")}
+                  <button class="ghost-button compact-button" type="button" data-host-action="hotseat-lock-audience-poll" ${canLockAudiencePoll ? "" : "disabled"}>Lock Audience Poll</button>
                   <button class="ghost-button compact-button" type="button" data-host-action="hotseat-resume-timer" ${canResumeTimer ? "" : "disabled"}>Resume Timer</button>
                   <button class="button compact-button" type="button" data-host-action="hotseat-lock-answer" ${canLockAnswer ? "" : "disabled"}>Lock</button>
                   <button class="ghost-button compact-button" type="button" data-host-action="hotseat-reveal" ${canRevealAnswer ? "" : "disabled"}>Reveal</button>
@@ -1446,6 +1892,7 @@ function renderHotSeatHost() {
       right: `<div class="inline-actions tight"><a class="ghost-button compact-button" href="/host">Quiz Host</a><a class="ghost-button compact-button" href="/hotseat-screen">Projector</a></div>`,
       chips: [
         { value: phaseLabel(state.phase) },
+        { value: activeHotSeatSet?.label || hotSeat.questionSetKey || "--" },
         { value: hotSeat.activeTeam?.name || "--" },
         { value: `${formatNumber(hotSeat.currentScore || 0)} pts` },
         { value: hotSeat.status || "standby" }
@@ -1484,7 +1931,7 @@ function renderHotSeatHost() {
         </aside>
       </div>
     `,
-    "operator-compact"
+    "operator-compact hotseat-roomy"
   );
 }
 
@@ -1514,7 +1961,7 @@ function renderHotSeatScreen() {
     <div class="glass-card compact-card compact-center compact-screen-card">
       <span class="kicker">Ready</span>
       <strong class="screen-title">Hot Seat Screen</strong>
-      <strong class="mono">${escapeHtml(routeUrl("/hotseat-host"))}</strong>
+      <p class="helper-copy">Keep this projector ready for the dedicated Hot Seat round.</p>
     </div>
   `;
 
@@ -1572,14 +2019,14 @@ function renderHotSeatScreen() {
       <div class="compact-grid compact-grid-main">
         ${mainPanel}
         <aside class="compact-sidebar">
-          <article class="glass-card compact-card compact-stack">
-            <h3>Ladder</h3>
-            ${renderScoreLadder(state)}
-          </article>
           ${
             hotSeat.audiencePoll && question
-              ? renderAudiencePoll(hotSeat, question)
+              ? renderAudiencePoll(hotSeat, question, { showQr: true, compactQr: true, projector: true })
               : `
+                <article class="glass-card compact-card compact-stack">
+                  <h3>Ladder</h3>
+                  ${renderScoreLadder(state)}
+                </article>
                 <article class="glass-card compact-card compact-stack">
                   <h3>Lifelines</h3>
                   <div class="lifeline-list">
@@ -1594,12 +2041,19 @@ function renderHotSeatScreen() {
         </aside>
       </div>
     `,
-    "screen-compact"
+    "screen-compact projector-roomy hotseat-roomy"
   );
 }
 
 function render() {
   ui.renderedAt = Date.now();
+
+  if (!ui.state) {
+    app.innerHTML = renderLoadingShell();
+    bindEvents();
+    updateDynamicBits();
+    return;
+  }
 
   if (page === "home") {
     app.innerHTML = renderHome();
@@ -1613,6 +2067,8 @@ function render() {
     app.innerHTML = renderScreen();
   } else if (page === "hotseat-screen") {
     app.innerHTML = renderHotSeatScreen();
+  } else if (page === "audience-poll") {
+    app.innerHTML = renderAudiencePollPage();
   }
 
   bindEvents();
@@ -1664,11 +2120,22 @@ function bindEvents() {
         return;
       }
 
+      ui.fffSubmitting = true;
+      render();
       send({
         type: "fff-submit",
         order,
         estimatedServerTime: serverNow()
       });
+    });
+  });
+
+  app.querySelectorAll("[data-form='player-auth']").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const formData = new FormData(form);
+      ui.pendingPlayerPin = String(formData.get("pin") || "");
+      send({ type: "player-auth", pin: ui.pendingPlayerPin });
     });
   });
 
@@ -1709,9 +2176,25 @@ function bindEvents() {
 
   app.querySelectorAll("[data-action='screening-answer']").forEach((button) => {
     button.addEventListener("click", () => {
+      const questionId = String(button.dataset.questionId || "");
+      const answerIndex = Number(button.dataset.answerIndex);
+      ui.pendingScreeningAnswers = {
+        ...ui.pendingScreeningAnswers,
+        [questionId]: answerIndex
+      };
+      render();
       send({
         type: "screening-answer",
-        questionId: button.dataset.questionId,
+        questionId,
+        answerIndex
+      });
+    });
+  });
+
+  app.querySelectorAll("[data-action='audience-vote']").forEach((button) => {
+    button.addEventListener("click", () => {
+      send({
+        type: "audience-vote",
         answerIndex: Number(button.dataset.answerIndex)
       });
     });
@@ -1726,6 +2209,9 @@ function bindEvents() {
       if (button.dataset.answerIndex !== undefined) payload.answerIndex = Number(button.dataset.answerIndex);
       if (action === "start-fff" && form) {
         payload.questionIndex = Number(new FormData(form).get("questionIndex"));
+      }
+      if (action === "set-hotseat-question-set" && form) {
+        payload.questionSetKey = String(new FormData(form).get("questionSetKey") || "");
       }
       if (action === "start-hotseat-for-team" && form) {
         payload.teamId = String(new FormData(form).get("teamId") || "");
@@ -1769,4 +2255,5 @@ function updateDynamicBits() {
 window.setInterval(updateDynamicBits, 300);
 window.setInterval(syncClock, 10000);
 
+render();
 connect();

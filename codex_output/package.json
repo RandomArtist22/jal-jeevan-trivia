@@ -4,6 +4,7 @@
   "private": true,
   "description": "Offline-first KBC style quiz website for the Jal Jeevan event.",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "start:cloudflared": "bash scripts/start-cloudflared.sh"
   }
 }

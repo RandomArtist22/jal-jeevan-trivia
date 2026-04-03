@@ -9,7 +9,13 @@ Offline-first KBC-style quiz website for the Jal Jeevan event.
 - `public/`
   Landing page, player portal, quiz-stage operator and screen pages, dedicated Hot Seat pages, shared CSS, and browser logic.
 - `data/questions.json`
-  Sample question bank for screening, Fastest Finger First, and Hot Seat.
+  Question bank for screening and Fastest Finger First.
+- `data/hotseat-questions-set-1.json`
+  Hot Seat question bank for Set 1.
+- `data/hotseat-questions-set-2.json`
+  Hot Seat question bank for Set 2.
+- `data/hotseat-questions-set-3.json`
+  Hot Seat question bank for Set 3.
 
 ## Run locally
 
@@ -25,6 +31,90 @@ If port `3000` is already in use:
 PORT=3080 npm start
 ```
 
+## Run with Cloudflare Tunnel
+
+The app can run on your laptop while teams join through a public `trycloudflare.com` link.
+
+Start both the local server and the Cloudflare quick tunnel with:
+
+```bash
+npm run start:cloudflared
+```
+
+If you need a different local port:
+
+```bash
+PORT=3080 npm run start:cloudflared
+```
+
+What this does:
+
+- starts the quiz server on your laptop
+- opens a `cloudflared` quick tunnel to that local port
+- captures the public tunnel URL
+- restarts the quiz server with `PUBLIC_BASE_URL` set so the operator UI shows the public share links
+
+The launcher forces:
+
+- `--protocol http2`
+- `--edge-ip-version 4`
+
+This avoids the common `failed to dial to edge with quic` timeout on networks that block UDP/QUIC.
+
+The script prints shareable URLs for:
+
+- `/play`
+- `/audience-poll`
+- `/host`
+- `/screen`
+- `/hotseat-host`
+- `/hotseat-screen`
+
+You can still keep the operator on the local URL, for example `http://127.0.0.1:3000/host`, while participants use the public Cloudflare link.
+
+If you want to run `cloudflared` manually, use:
+
+```bash
+cloudflared tunnel --url http://127.0.0.1:3000 --protocol http2 --edge-ip-version 4 --no-autoupdate
+```
+
+## Run with ngrok
+
+The app can stay on your laptop while teams join through an ngrok URL.
+
+1. Start the server locally:
+
+```bash
+PORT=3000 npm start
+```
+
+2. In another terminal, expose that port with ngrok:
+
+```bash
+ngrok http 3000
+```
+
+3. Copy the HTTPS forwarding URL from ngrok, then restart the server with that public URL:
+
+```bash
+PUBLIC_BASE_URL=https://your-subdomain.ngrok-free.app PORT=3000 npm start
+```
+
+With `PUBLIC_BASE_URL` set:
+
+- the operator and router pages show the ngrok links instead of `localhost`
+- team devices can join using the ngrok `/play` URL
+- projector and Hot Seat routes also use the same ngrok base URL
+
+Example public routes:
+
+- `https://your-subdomain.ngrok-free.app/play`
+- `https://your-subdomain.ngrok-free.app/audience-poll`
+- `https://your-subdomain.ngrok-free.app/host`
+- `https://your-subdomain.ngrok-free.app/screen`
+- `https://your-subdomain.ngrok-free.app/hotseat-host`
+- `https://your-subdomain.ngrok-free.app/hotseat-screen`
+
 ## Host setup for the event
 
 1. Connect the host laptop to the private router.
@@ -32,6 +122,7 @@ PORT=3080 npm start
 3. Find the laptop's local IP on that router, for example `192.168.0.12`.
 4. Open these URLs on devices:
    - Player devices for screening and FFF: `http://<local-ip>:<port>/play`
+   - Audience poll devices during Hot Seat: `http://<local-ip>:<port>/audience-poll`
    - Quiz operator laptop page for registration, screening, and FFF: `http://<local-ip>:<port>/host`
    - Quiz projector page for screening and FFF: `http://<local-ip>:<port>/screen`
    - Dedicated Hot Seat operator page: `http://<local-ip>:<port>/hotseat-host`
@@ -45,10 +136,23 @@ Default host PIN:
 jaljeevan-admin
 ```
 
-You can override it:
+You can override it with a local `.env` file:
 
 ```bash
-ADMIN_PIN=my-secret-pin npm start
+cp .env.example .env
+```
+
+Then set:
+
+```text
+ADMIN_PIN=my-secret-pin
+PLAYER_PIN=my-player-password
+```
+
+Or override it directly from the shell:
+
+```bash
+ADMIN_PIN=my-secret-pin PLAYER_PIN=my-player-password npm start
 ```
 
 ## Event flow implemented
@@ -67,7 +171,13 @@ ADMIN_PIN=my-secret-pin npm start
 
 ## Editing questions
 
-Update `data/questions.json`.
+Update `data/questions.json` for screening and Fastest Finger First.
+
+Update one of these for Hot Seat:
+
+- `data/hotseat-questions-set-1.json`
+- `data/hotseat-questions-set-2.json`
+- `data/hotseat-questions-set-3.json`
 
 - `screening`
   Multiple-choice questions for the 5-minute online round
@@ -80,4 +190,4 @@ Update `data/questions.json`.
 
 - State is stored in memory for speed and simplicity. Restarting the server resets the game.
 - Participant devices stop interacting after Fastest Finger First. Hot Seat is run entirely from the dedicated operator and projector pages.
-- The app is designed for a closed local network, not for internet deployment.
+- For tunnel-based access, use `PUBLIC_BASE_URL` so the UI advertises the public ngrok links correctly.
