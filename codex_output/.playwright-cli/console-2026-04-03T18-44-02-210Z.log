@@ -2498,3 +2498,126 @@
 [ 3469300ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
 [ 3469400ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
 [ 3472001ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3474155ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3474255ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3476856ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3477233ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3477334ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3479935ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3483367ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3483468ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3484569ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3484669ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3485770ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3485871ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3486972ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3487073ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3488174ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3488274ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3489377ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3489477ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3490579ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3490680ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3491786ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3491886ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3492992ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3493093ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3494232ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3494333ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3495489ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3495590ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3496725ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3496826ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3498151ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3498251ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3499695ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3499795ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3501859ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3501959ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3504560ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3504835ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3504936ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3507536ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3510186ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3510287ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3512887ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3514387ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3514487ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3517088ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3520344ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3520445ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3523045ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3525363ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3525464ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3528064ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3529541ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3529641ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3532242ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3534059ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3534160ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3536760ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3538689ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3538790ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3541390ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3541784ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3541885ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3544485ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3545666ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3545767ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3548367ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3550328ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3550429ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3553029ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3554097ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3554198ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3556798ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3559739ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3559840ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3562440ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3562675ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3562775ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3565376ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3566146ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3566247ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3568847ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3568885ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3568986ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3571586ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3572951ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3573052ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3575652ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3577528ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3577628ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3580229ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3581607ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3581708ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3584308ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3587403ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3587504ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3590104ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3592839ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3592940ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3595541ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3596942ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3597043ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3599643ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3599791ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3599892ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3602492ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3603190ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3603291ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3605891ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3607796ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3607897ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3610303ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3610404ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3613004ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3615983ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3616084ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3618685ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3619043ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3619143ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3621744ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3622044ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3080/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3080/app.js:73
+[ 3622145ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
+[ 3624746ms] [VERBOSE] [DOM] Password forms should have (optionally hidden) username fields for accessibility: (More info: https://goo.gl/9p2vKq) %o @ http://127.0.0.1:3080/host:0
