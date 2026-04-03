@@ -1,0 +1,30 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - main [ref=e4]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: Hot Seat Operator · Laptop Only
+      - heading "Hot Seat Control" [level=1] [ref=e8]
+      - paragraph [ref=e9]: Unlock this page only when Hot Seat is about to begin.
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - heading "Operator PIN" [level=3] [ref=e12]
+          - paragraph [ref=e13]: This is the dedicated control surface for Hot Seat. Participant devices do nothing in this round.
+          - generic [ref=e14]:
+            - generic [ref=e15]: PIN
+            - textbox "PIN" [ref=e16]:
+              - /placeholder: jaljeevan-admin…
+          - button "Unlock Hot Seat Control" [ref=e17] [cursor=pointer]
+        - generic [ref=e18]:
+          - heading "Hot Seat Endpoints" [level=3] [ref=e19]
+          - generic [ref=e20]:
+            - article [ref=e21]:
+              - generic [ref=e22]: Operator
+              - heading "Hot Seat Operator" [level=4] [ref=e23]
+              - paragraph [ref=e24]: http://127.0.0.1:3080/hotseat-host
+              - paragraph [ref=e25]: Select the spoken answer and reveal the result here.
+            - article [ref=e26]:
+              - generic [ref=e27]: Projector
+              - heading "Hot Seat Screen" [level=4] [ref=e28]
+              - paragraph [ref=e29]: http://127.0.0.1:3080/hotseat-screen
+              - paragraph [ref=e30]: Project this page during the Hot Seat round.

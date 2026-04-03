@@ -1,0 +1,42 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - main [ref=e4]:
+    - generic [ref=e46]:
+      - generic [ref=e47]:
+        - generic [ref=e49]: Operator Console
+        - heading "Unlock Quiz Host" [level=1] [ref=e51]
+        - generic [ref=e53]: http://127.0.0.1:3080/host
+      - generic [ref=e55]:
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - generic [ref=e58]: PIN
+            - textbox "PIN" [ref=e59]:
+              - /placeholder: jaljeevan-admin
+          - button "Unlock" [ref=e60] [cursor=pointer]
+        - generic [ref=e61]:
+          - link "Teams Play http://127.0.0.1:3080/play" [ref=e62] [cursor=pointer]:
+            - /url: /play
+            - generic [ref=e64]: Teams
+            - heading "Play" [level=3] [ref=e65]
+            - generic [ref=e66]: http://127.0.0.1:3080/play
+          - link "Operator Quiz Host http://127.0.0.1:3080/host" [ref=e67] [cursor=pointer]:
+            - /url: /host
+            - generic [ref=e69]: Operator
+            - heading "Quiz Host" [level=3] [ref=e70]
+            - generic [ref=e71]: http://127.0.0.1:3080/host
+          - link "Projector Quiz Screen http://127.0.0.1:3080/screen" [ref=e72] [cursor=pointer]:
+            - /url: /screen
+            - generic [ref=e74]: Projector
+            - heading "Quiz Screen" [level=3] [ref=e75]
+            - generic [ref=e76]: http://127.0.0.1:3080/screen
+          - link "Operator Hot Seat Host http://127.0.0.1:3080/hotseat-host" [ref=e77] [cursor=pointer]:
+            - /url: /hotseat-host
+            - generic [ref=e79]: Operator
+            - heading "Hot Seat Host" [level=3] [ref=e80]
+            - generic [ref=e81]: http://127.0.0.1:3080/hotseat-host
+          - link "Projector Hot Seat Screen http://127.0.0.1:3080/hotseat-screen" [ref=e82] [cursor=pointer]:
+            - /url: /hotseat-screen
+            - generic [ref=e84]: Projector
+            - heading "Hot Seat Screen" [level=3] [ref=e85]
+            - generic [ref=e86]: http://127.0.0.1:3080/hotseat-screen

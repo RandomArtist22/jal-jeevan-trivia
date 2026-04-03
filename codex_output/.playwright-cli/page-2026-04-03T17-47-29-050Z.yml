@@ -1,0 +1,106 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - main [ref=e4]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: Jal Jeevan Event · Offline Router Network
+      - heading "Jal Jeevan Trivia" [level=1] [ref=e8]
+      - paragraph [ref=e9]: Flow With Unity
+      - paragraph [ref=e10]: "This app has three separate roles: the operator console on the laptop, the projector screen for the audience, and the player portal on team devices. Each endpoint has a different job."
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - heading "Live Event Status" [level=3] [ref=e13]
+          - generic [ref=e14]: Lobby
+          - paragraph [ref=e15]: Waiting for teams to join the river.
+          - status [ref=e16]:
+            - strong [ref=e17]: Operator Focus
+            - paragraph [ref=e18]: Keep this page on the laptop, share /play with teams, and wait for registrations before starting the show.
+        - generic [ref=e19]:
+          - heading "Venue Setup Checklist" [level=3] [ref=e20]
+          - list [ref=e21]:
+            - listitem [ref=e22]:
+              - strong [ref=e23]: Keep http://127.0.0.1:3000/host on the operator laptop only.
+              - text: This page controls the event.
+            - listitem [ref=e24]:
+              - strong [ref=e25]: Project http://127.0.0.1:3000/screen to the venue display.
+              - text: Nobody interacts here.
+            - listitem [ref=e26]:
+              - strong [ref=e27]: Share http://127.0.0.1:3000/play with teams.
+              - text: One device should stay linked to one team.
+            - listitem [ref=e28]:
+              - strong [ref=e29]: Start screening only after registrations are stable.
+              - text: After screening, mark qualifiers, run Fastest Finger First, then seat the winner.
+      - generic [ref=e30]:
+        - link "Team Devices Open Player Portal Player Portal Register a team, answer screening questions, submit Fastest Finger First, and play only when your team is called. Use On Phones or tablets with one device per team Controlled By Each team on its own device Do Next Open this on team devices and leave it there. Open Player Portal" [ref=e31] [cursor=pointer]:
+          - /url: /play
+          - generic [ref=e32]:
+            - generic [ref=e33]: Team Devices
+            - generic [ref=e34]: Open Player Portal
+          - heading "Player Portal" [level=3] [ref=e35]
+          - paragraph [ref=e36]: Register a team, answer screening questions, submit Fastest Finger First, and play only when your team is called.
+          - generic [ref=e37]:
+            - generic [ref=e38]:
+              - generic [ref=e39]: Use On
+              - paragraph [ref=e40]: Phones or tablets with one device per team
+            - generic [ref=e41]:
+              - generic [ref=e42]: Controlled By
+              - paragraph [ref=e43]: Each team on its own device
+            - generic [ref=e44]:
+              - generic [ref=e45]: Do Next
+              - paragraph [ref=e46]: Open this on team devices and leave it there.
+          - generic [ref=e47]: Open Player Portal
+        - link "Operator Only Open Operator Console Operator Console Run the quiz, control every phase, reveal results, choose teams, and manage the projector flow from the laptop. Use On The laptop running the server Controlled By The event operator only Do Next Use this endpoint to drive the full show. Open Operator Console" [ref=e48] [cursor=pointer]:
+          - /url: /host
+          - generic [ref=e49]:
+            - generic [ref=e50]: Operator Only
+            - generic [ref=e51]: Open Operator Console
+          - heading "Operator Console" [level=3] [ref=e52]
+          - paragraph [ref=e53]: Run the quiz, control every phase, reveal results, choose teams, and manage the projector flow from the laptop.
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - generic [ref=e56]: Use On
+              - paragraph [ref=e57]: The laptop running the server
+            - generic [ref=e58]:
+              - generic [ref=e59]: Controlled By
+              - paragraph [ref=e60]: The event operator only
+            - generic [ref=e61]:
+              - generic [ref=e62]: Do Next
+              - paragraph [ref=e63]: Use this endpoint to drive the full show.
+          - generic [ref=e64]: Open Operator Console
+        - link "Projector View Open Main Screen Main Screen Show the audience the current phase, live question, score ladder, notices, and leaderboard without exposing controls. Use On Projector or venue display Controlled By Operator-controlled from /host Do Next Keep this page projected for the whole event. Open Main Screen" [ref=e65] [cursor=pointer]:
+          - /url: /screen
+          - generic [ref=e66]:
+            - generic [ref=e67]: Projector View
+            - generic [ref=e68]: Open Main Screen
+          - heading "Main Screen" [level=3] [ref=e69]
+          - paragraph [ref=e70]: Show the audience the current phase, live question, score ladder, notices, and leaderboard without exposing controls.
+          - generic [ref=e71]:
+            - generic [ref=e72]:
+              - generic [ref=e73]: Use On
+              - paragraph [ref=e74]: Projector or venue display
+            - generic [ref=e75]:
+              - generic [ref=e76]: Controlled By
+              - paragraph [ref=e77]: Operator-controlled from /host
+            - generic [ref=e78]:
+              - generic [ref=e79]: Do Next
+              - paragraph [ref=e80]: Keep this page projected for the whole event.
+          - generic [ref=e81]: Open Main Screen
+      - generic [ref=e82]:
+        - generic [ref=e83]:
+          - heading "Shared Address" [level=3] [ref=e84]
+          - paragraph [ref=e85]: This device is currently serving the quiz at the address below. Use the same base address on the private router for every screen in the venue.
+          - generic [ref=e86]: http://127.0.0.1:3000
+          - paragraph [ref=e87]: If this laptop is the host machine on the venue router, share this base address plus the route for each role.
+        - generic [ref=e88]:
+          - heading "Event Flow" [level=3] [ref=e89]
+          - list [ref=e90]:
+            - listitem [ref=e91]:
+              - strong [ref=e92]: 1. Screening Round
+              - text: Teams answer the MCQ screening on /play within five minutes.
+            - listitem [ref=e93]:
+              - strong [ref=e94]: 2. Fastest Finger First
+              - text: Qualified teams arrange the options in the correct order.
+            - listitem [ref=e95]:
+              - strong [ref=e96]: 3. Hot Seat
+              - text: The seated team answers the public question while the operator controls reveals and lifelines.
+    - paragraph [ref=e97]: Operator PIN is set in server.js or via the ADMIN_PIN environment variable.

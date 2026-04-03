@@ -1,0 +1,163 @@
+{
+  "screeningDurationSeconds": 300,
+  "fffDurationSeconds": 45,
+  "screening": [
+    {
+      "id": "scr-1",
+      "topic": "General Knowledge",
+      "question": "Which planet in our solar system is known as the Red Planet?",
+      "options": ["Earth", "Mars", "Venus", "Jupiter"],
+      "answerIndex": 1
+    },
+    {
+      "id": "scr-2",
+      "topic": "Science & Technology",
+      "question": "What does CPU stand for in computing?",
+      "options": ["Central Process Unit", "Central Processing Unit", "Computer Primary Unit", "Core Processing Utility"],
+      "answerIndex": 1
+    },
+    {
+      "id": "scr-3",
+      "topic": "Sports",
+      "question": "How many players are there in a standard football team on the field at one time?",
+      "options": ["9", "10", "11", "12"],
+      "answerIndex": 2
+    },
+    {
+      "id": "scr-4",
+      "topic": "Entertainment",
+      "question": "Which Indian city is widely known as the home of Bollywood?",
+      "options": ["Hyderabad", "Mumbai", "Chennai", "Kolkata"],
+      "answerIndex": 1
+    },
+    {
+      "id": "scr-5",
+      "topic": "Academics",
+      "question": "In chemistry, what is the chemical symbol for sodium?",
+      "options": ["S", "So", "Na", "Sd"],
+      "answerIndex": 2
+    },
+    {
+      "id": "scr-6",
+      "topic": "General Knowledge",
+      "question": "Who wrote the Indian national song 'Vande Mataram'?",
+      "options": ["Rabindranath Tagore", "Bankim Chandra Chattopadhyay", "Sarojini Naidu", "Subramania Bharati"],
+      "answerIndex": 1
+    },
+    {
+      "id": "scr-7",
+      "topic": "Science & Technology",
+      "question": "Which device is primarily used to measure electric current?",
+      "options": ["Voltmeter", "Thermometer", "Ammeter", "Barometer"],
+      "answerIndex": 2
+    },
+    {
+      "id": "scr-8",
+      "topic": "General Knowledge",
+      "question": "The river Ganga originates from which glacier?",
+      "options": ["Siachen Glacier", "Gangotri Glacier", "Pindari Glacier", "Zemu Glacier"],
+      "answerIndex": 1
+    }
+  ],
+  "fastestFinger": [
+    {
+      "id": "fff-1",
+      "prompt": "Arrange these stages in the natural water cycle from earliest to latest.",
+      "options": [
+        { "id": "evaporation", "text": "Evaporation" },
+        { "id": "condensation", "text": "Condensation" },
+        { "id": "precipitation", "text": "Precipitation" },
+        { "id": "collection", "text": "Collection" }
+      ],
+      "correctOrder": ["evaporation", "condensation", "precipitation", "collection"]
+    },
+    {
+      "id": "fff-2",
+      "prompt": "Arrange these Indian space missions in chronological order of launch.",
+      "options": [
+        { "id": "mangalyaan", "text": "Mars Orbiter Mission (Mangalyaan)" },
+        { "id": "chandrayaan1", "text": "Chandrayaan-1" },
+        { "id": "chandrayaan2", "text": "Chandrayaan-2" },
+        { "id": "adityal1", "text": "Aditya-L1" }
+      ],
+      "correctOrder": ["chandrayaan1", "mangalyaan", "chandrayaan2", "adityal1"]
+    },
+    {
+      "id": "fff-3",
+      "prompt": "Arrange these SI units from the smallest base quantity symbol to the largest according to the prefixes shown.",
+      "options": [
+        { "id": "mm", "text": "Millimetre" },
+        { "id": "cm", "text": "Centimetre" },
+        { "id": "m", "text": "Metre" },
+        { "id": "km", "text": "Kilometre" }
+      ],
+      "correctOrder": ["mm", "cm", "m", "km"]
+    }
+  ],
+  "hotSeat": [
+    {
+      "id": "hot-1",
+      "points": 10,
+      "topic": "General Knowledge",
+      "question": "Which gas do plants primarily absorb from the atmosphere for photosynthesis?",
+      "options": ["Oxygen", "Nitrogen", "Carbon dioxide", "Hydrogen"],
+      "answerIndex": 2
+    },
+    {
+      "id": "hot-2",
+      "points": 20,
+      "topic": "Sports",
+      "question": "Which country won the ICC Men's Cricket World Cup in 2011?",
+      "options": ["India", "Australia", "England", "Sri Lanka"],
+      "answerIndex": 0
+    },
+    {
+      "id": "hot-3",
+      "points": 50,
+      "topic": "Entertainment",
+      "question": "Which movie features the song 'Naatu Naatu'?",
+      "options": ["Pushpa", "RRR", "Baahubali", "KGF"],
+      "answerIndex": 1
+    },
+    {
+      "id": "hot-4",
+      "points": 100,
+      "topic": "Science & Technology",
+      "question": "What is the SI unit of force?",
+      "options": ["Pascal", "Watt", "Newton", "Joule"],
+      "answerIndex": 2
+    },
+    {
+      "id": "hot-5",
+      "points": 500,
+      "topic": "Academics",
+      "question": "In linear algebra, the determinant is defined only for which kind of matrix?",
+      "options": ["Triangular matrices only", "Square matrices", "Symmetric matrices only", "Sparse matrices only"],
+      "answerIndex": 1
+    },
+    {
+      "id": "hot-6",
+      "points": 1000,
+      "topic": "General Knowledge",
+      "question": "Which article of the Indian Constitution deals with the Right to Equality?",
+      "options": ["Article 14", "Article 19", "Article 21", "Article 32"],
+      "answerIndex": 0
+    },
+    {
+      "id": "hot-7",
+      "points": 2000,
+      "topic": "Science & Technology",
+      "question": "Which data structure uses the Last In, First Out principle?",
+      "options": ["Queue", "Graph", "Stack", "Heap"],
+      "answerIndex": 2
+    },
+    {
+      "id": "hot-8",
+      "points": 5000,
+      "topic": "General Knowledge",
+      "question": "Which Indian river is known as the 'Dakshin Ganga'?",
+      "options": ["Godavari", "Narmada", "Krishna", "Kaveri"],
+      "answerIndex": 0
+    }
+  ]
+}

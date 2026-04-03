@@ -1,0 +1,34 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - main [ref=e4]:
+    - generic [ref=e39]:
+      - generic [ref=e40]: Player Portal · Blue Current
+      - heading "Team Dashboard" [level=1] [ref=e41]
+      - paragraph [ref=e42]: This device stays synced to the local quiz server.
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - heading "Team Snapshot" [level=3] [ref=e45]
+          - generic [ref=e46]: "0"
+          - list [ref=e47]:
+            - listitem [ref=e48]: "Members: Asha & Rohan"
+            - listitem [ref=e49]: "Screening Score: 0"
+            - listitem [ref=e50]: "Current Pool: Awaiting Screening Result"
+            - listitem [ref=e51]: "Current Phase: Lobby"
+          - generic [ref=e52]:
+            - button "Reset This Device" [ref=e53] [cursor=pointer]
+            - link "Home" [ref=e54] [cursor=pointer]:
+              - /url: /
+          - status [ref=e55]: Team registered on the host server.
+        - generic [ref=e56]:
+          - heading "What To Do Now" [level=3] [ref=e57]
+          - status [ref=e58]:
+            - strong [ref=e59]: Lobby
+            - paragraph [ref=e60]: Stay on this page. The operator will start the next round from the operator console.
+          - status [ref=e61]:
+            - strong [ref=e62]: Operator Notice
+            - paragraph [ref=e63]: Blue Current joined the flow.
+          - paragraph [ref=e64]: "Estimated server time: 11:18:18 PM"
+    - generic [ref=e66]:
+      - heading "Waiting Room" [level=3] [ref=e67]
+      - paragraph [ref=e68]: The host will launch the next phase from the quiz laptop.

@@ -1,0 +1,153 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - main [ref=e4]:
+    - generic [ref=e37]:
+      - generic [ref=e38]: Operator Console · Laptop Only
+      - heading "Run The Quiz" [level=1] [ref=e39]
+      - paragraph [ref=e40]: This endpoint stays with the operator for the full event.
+      - generic [ref=e41]:
+        - generic [ref=e42]:
+          - heading "Phase" [level=3] [ref=e43]
+          - generic [ref=e44]: Lobby
+        - generic [ref=e45]:
+          - heading "Registered" [level=3] [ref=e46]
+          - generic [ref=e47]: "0"
+        - generic [ref=e48]:
+          - heading "Qualified" [level=3] [ref=e49]
+          - generic [ref=e50]: "0"
+        - generic [ref=e51]:
+          - heading "Connected Now" [level=3] [ref=e52]
+          - generic [ref=e53]: "0"
+      - generic [ref=e54]:
+        - generic [ref=e55]:
+          - heading "What To Do Now" [level=3] [ref=e56]
+          - status [ref=e57]:
+            - strong [ref=e58]: Lobby
+            - paragraph [ref=e59]: Keep this page on the laptop, share /play with teams, and wait for registrations before starting the show.
+          - status [ref=e60]:
+            - strong [ref=e61]: Live Notice
+            - paragraph [ref=e62]: Host console connected.
+        - generic [ref=e63]:
+          - heading "Venue Endpoint Guide" [level=3] [ref=e64]
+          - generic [ref=e65]:
+            - article [ref=e66]:
+              - generic [ref=e67]: Operator
+              - heading "Control Page" [level=4] [ref=e68]
+              - paragraph [ref=e69]: http://127.0.0.1:3000/host
+              - paragraph [ref=e70]: Keep on the laptop only.
+            - article [ref=e71]:
+              - generic [ref=e72]: Teams
+              - heading "Player Portal" [level=4] [ref=e73]
+              - paragraph [ref=e74]: http://127.0.0.1:3000/play
+              - paragraph [ref=e75]: Open on team devices. One device per team.
+            - article [ref=e76]:
+              - generic [ref=e77]: Audience
+              - heading "Main Screen" [level=4] [ref=e78]
+              - paragraph [ref=e79]: http://127.0.0.1:3000/screen
+              - paragraph [ref=e80]: Project this to the venue display.
+      - generic [ref=e81]:
+        - generic [ref=e82]:
+          - heading "Run Of Show" [level=3] [ref=e83]
+          - list [ref=e84]:
+            - listitem [ref=e85]:
+              - strong [ref=e86]: Waiting for registrations.
+              - text: Teams join on /play before screening starts.
+            - listitem [ref=e87]:
+              - strong [ref=e88]: Screening step.
+              - text: Start screening, then end it to freeze the ranking.
+            - listitem [ref=e89]:
+              - strong [ref=e90]: Qualifiers pending.
+              - text: Mark the qualified teams before Fastest Finger First.
+            - listitem [ref=e91]:
+              - strong [ref=e92]: Fastest Finger First winner not seated yet.
+              - text: Seat the winner or manually choose the next Hot Seat team.
+            - listitem [ref=e93]:
+              - strong [ref=e94]: No Hot Seat runs completed yet.
+              - text: Keep the projector on /screen while you move between teams.
+        - generic [ref=e95]:
+          - heading "Operator Snapshot" [level=3] [ref=e96]
+          - list [ref=e97]:
+            - listitem [ref=e98]: "Audience Entries: 0"
+            - listitem [ref=e99]: "Completed Hot Seat Runs: 0"
+            - listitem [ref=e100]: "Current FFF Winner: Not decided yet"
+            - listitem [ref=e101]: "Active Hot Seat Team: None"
+    - generic [ref=e102]:
+      - article [ref=e103]:
+        - generic [ref=e104]:
+          - heading "Screening Controls" [level=3] [ref=e105]
+          - generic [ref=e106]: idle
+        - paragraph [ref=e107]: Use this after team registrations stabilize. Ending the round freezes the responses and ranking.
+        - generic [ref=e108]:
+          - button "Start Screening Round" [disabled] [ref=e109]
+          - button "Stop Screening" [disabled] [ref=e110]
+          - button "Mark Qualifiers" [disabled] [ref=e111]
+        - paragraph [ref=e112]: Qualified teams continue to Fastest Finger First. Audience entries are listed separately if enabled.
+        - heading "Ranking" [level=3] [ref=e113]
+        - generic [ref=e114]: No ranking data yet.
+      - article [ref=e115]:
+        - generic [ref=e116]:
+          - heading "FFF Controls" [level=3] [ref=e117]
+          - generic [ref=e118]: idle
+        - paragraph [ref=e119]: Open one Fastest Finger First question at a time. If qualifiers are marked, only that pool can answer.
+        - generic [ref=e120]:
+          - generic [ref=e121]:
+            - generic [ref=e122]: Question
+            - combobox "Question" [ref=e123]:
+              - option "FFF 1" [selected]
+              - option "FFF 2"
+              - option "FFF 3"
+          - generic [ref=e124]:
+            - button "Start FFF Question" [disabled] [ref=e125]
+            - button "Lock & Rank" [disabled] [ref=e126]
+            - button "Seat Winner" [disabled] [ref=e127]
+        - paragraph [ref=e128]: "Winner: No winner selected yet"
+        - heading "FFF Ranking" [level=3] [ref=e129]
+        - generic [ref=e130]: No ranking data yet.
+    - generic [ref=e131]:
+      - article [ref=e132]:
+        - generic [ref=e133]:
+          - heading "Hot Seat Controls" [level=3] [ref=e134]
+          - generic [ref=e135]: idle
+        - paragraph [ref=e136]: Seat the Fastest Finger First winner or manually pick a team. Only the operator controls reveal and pacing from here.
+        - generic [ref=e137]:
+          - generic [ref=e138]:
+            - generic [ref=e139]: Manual Team Selection
+            - combobox "Manual Team Selection" [ref=e140]:
+              - option "No teams available" [selected]
+          - button "Start Hot Seat For Team" [disabled] [ref=e141]
+        - generic [ref=e142]:
+          - button "50/50" [disabled] [ref=e143]
+          - button "Audience Poll" [disabled] [ref=e144]
+          - button "Call a Friend" [disabled] [ref=e145]
+        - generic [ref=e146]:
+          - button "Reveal Answer" [disabled] [ref=e147]
+          - button "Next Question" [disabled] [ref=e148]
+          - button "End Turn" [disabled] [ref=e149]
+        - generic [ref=e150]:
+          - heading "Active Team" [level=3] [ref=e151]
+          - generic [ref=e152]: "--"
+          - paragraph [ref=e153]: "Current Score: 0 · Guaranteed: 0"
+      - article [ref=e154]:
+        - heading "Display Notice & System" [level=3] [ref=e156]
+        - paragraph [ref=e157]: Use the notice box for instructions that should appear immediately on the player and projector views.
+        - generic [ref=e158]:
+          - generic [ref=e159]:
+            - generic [ref=e160]: Display Notice
+            - textbox "Display Notice" [ref=e161]:
+              - /placeholder: Tell teams what happens next…
+              - text: Host console connected.
+          - button "Update Notice" [ref=e162] [cursor=pointer]
+        - generic [ref=e163]:
+          - button "Reset Game" [ref=e164] [cursor=pointer]
+          - link "Open Main Screen" [ref=e165] [cursor=pointer]:
+            - /url: /screen
+          - link "Open Player Portal" [ref=e166] [cursor=pointer]:
+            - /url: /play
+    - generic [ref=e167]:
+      - article [ref=e168]:
+        - heading "Teams" [level=3] [ref=e169]
+        - generic [ref=e170]: No teams have joined yet.
+      - article [ref=e171]:
+        - heading "Current Question Data" [level=3] [ref=e172]
+        - generic [ref=e173]: Open a question to see its answer key here.

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(pravah26.netlify.app)",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(mkdir *)",
+      "Bash(node *)",
+      "Bash(sleep *)",
+      "Bash(curl *)",
+      "Bash(kill *)"
+    ]
+  },
+  "$version": 3
+}

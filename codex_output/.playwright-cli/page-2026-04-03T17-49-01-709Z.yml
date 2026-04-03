@@ -1,0 +1,67 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - main [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - generic [ref=e8]: Jal Jeevan Trivia
+          - heading "Pravah Quiz" [level=1] [ref=e9]
+          - paragraph [ref=e10]: Flow With Unity
+        - generic [ref=e11]:
+          - strong [ref=e12]: Projector View
+          - paragraph [ref=e13]: Project this page to the venue. Teams should open /play and the operator should control /host.
+          - paragraph [ref=e14]: Controlled from http://127.0.0.1:3000/host
+      - generic [ref=e15]:
+        - generic [ref=e17]:
+          - heading "Projector Is Ready" [level=3] [ref=e18]
+          - paragraph [ref=e19]: Teams should join on http://127.0.0.1:3000/play. The operator should control the event from http://127.0.0.1:3000/host.
+        - complementary [ref=e20]:
+          - generic [ref=e21]:
+            - heading "Leaderboard" [level=3] [ref=e22]
+            - list [ref=e23]:
+              - listitem [ref=e24]: Blue Current · 0 pts
+          - generic [ref=e25]:
+            - heading "Live Notice" [level=3] [ref=e26]
+            - paragraph [ref=e27]: Blue Current joined the flow.
+          - generic [ref=e28]:
+            - heading "Score Ladder" [level=3] [ref=e29]
+            - generic [ref=e30]:
+              - generic [ref=e31]:
+                - strong [ref=e32]: Q8
+                - generic [ref=e33]: Question
+                - generic [ref=e34]: 5,000
+              - generic [ref=e35]:
+                - strong [ref=e36]: Q7
+                - generic [ref=e37]: Question
+                - generic [ref=e38]: 2,000
+              - generic [ref=e39]:
+                - strong [ref=e40]: Q6
+                - generic [ref=e41]: Safe Level
+                - generic [ref=e42]: 1,000
+              - generic [ref=e43]:
+                - strong [ref=e44]: Q5
+                - generic [ref=e45]: Question
+                - generic [ref=e46]: "500"
+              - generic [ref=e47]:
+                - strong [ref=e48]: Q4
+                - generic [ref=e49]: Question
+                - generic [ref=e50]: "100"
+              - generic [ref=e51]:
+                - strong [ref=e52]: Q3
+                - generic [ref=e53]: Question
+                - generic [ref=e54]: "50"
+              - generic [ref=e55]:
+                - strong [ref=e56]: Q2
+                - generic [ref=e57]: Safe Level
+                - generic [ref=e58]: "20"
+              - generic [ref=e59]:
+                - strong [ref=e60]: Q1
+                - generic [ref=e61]: Question
+                - generic [ref=e62]: "10"
+          - generic [ref=e63]:
+            - heading "Lifelines" [level=3] [ref=e64]
+            - generic [ref=e65]:
+              - generic [ref=e66]: 50/50
+              - generic [ref=e67]: Audience Poll
+              - generic [ref=e68]: Call a Friend

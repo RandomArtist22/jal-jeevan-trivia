@@ -1,0 +1,142 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - main [ref=e4]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: Jal Jeevan Event · Offline Router Network
+      - heading "Jal Jeevan Trivia" [level=1] [ref=e8]
+      - paragraph [ref=e9]: Flow With Unity
+      - paragraph [ref=e10]: This app now runs in two stages. Screening and Fastest Finger First use the main quiz endpoints. Hot Seat uses a separate operator endpoint and a separate projector endpoint.
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - heading "Live Event Status" [level=3] [ref=e13]
+          - generic [ref=e14]: Intermission
+          - paragraph [ref=e15]: Ramcharan leaves with 0 points.
+          - status [ref=e16]:
+            - strong [ref=e17]: Operator Focus
+            - paragraph [ref=e18]: The quiz stage is paused while Hot Seat handoff is handled on the dedicated Hot Seat endpoints.
+        - generic [ref=e19]:
+          - heading "Venue Setup Checklist" [level=3] [ref=e20]
+          - list [ref=e21]:
+            - listitem [ref=e22]:
+              - strong [ref=e23]: Keep http://127.0.0.1:3000/host on the operator laptop only.
+              - text: This page controls the event.
+            - listitem [ref=e24]:
+              - strong [ref=e25]: Project http://127.0.0.1:3000/screen to the venue display.
+              - text: Nobody interacts here.
+            - listitem [ref=e26]:
+              - strong [ref=e27]: Share http://127.0.0.1:3000/play with teams.
+              - text: One device should stay linked to one team.
+            - listitem [ref=e28]:
+              - strong [ref=e29]: After Fastest Finger First, switch to http://127.0.0.1:3000/hotseat-host and http://127.0.0.1:3000/hotseat-screen.
+              - text: Participant devices do nothing during Hot Seat.
+      - generic [ref=e30]:
+        - link "Team Devices Open Player Portal Player Portal Register a team, answer screening questions, and submit Fastest Finger First from the team device. Use On Phones or tablets with one device per team Controlled By Each team on its own device Do Next Use this only through Fastest Finger First. Open Player Portal" [ref=e31] [cursor=pointer]:
+          - /url: /play
+          - generic [ref=e32]:
+            - generic [ref=e33]: Team Devices
+            - generic [ref=e34]: Open Player Portal
+          - heading "Player Portal" [level=3] [ref=e35]
+          - paragraph [ref=e36]: Register a team, answer screening questions, and submit Fastest Finger First from the team device.
+          - generic [ref=e37]:
+            - generic [ref=e38]:
+              - generic [ref=e39]: Use On
+              - paragraph [ref=e40]: Phones or tablets with one device per team
+            - generic [ref=e41]:
+              - generic [ref=e42]: Controlled By
+              - paragraph [ref=e43]: Each team on its own device
+            - generic [ref=e44]:
+              - generic [ref=e45]: Do Next
+              - paragraph [ref=e46]: Use this only through Fastest Finger First.
+          - generic [ref=e47]: Open Player Portal
+        - link "Operator Only Open Quiz Operator Quiz Operator Run registration, screening, qualifiers, and Fastest Finger First from the laptop. Use On The laptop running the server Controlled By The event operator only Do Next Use this endpoint until Fastest Finger First is complete. Open Quiz Operator" [ref=e48] [cursor=pointer]:
+          - /url: /host
+          - generic [ref=e49]:
+            - generic [ref=e50]: Operator Only
+            - generic [ref=e51]: Open Quiz Operator
+          - heading "Quiz Operator" [level=3] [ref=e52]
+          - paragraph [ref=e53]: Run registration, screening, qualifiers, and Fastest Finger First from the laptop.
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - generic [ref=e56]: Use On
+              - paragraph [ref=e57]: The laptop running the server
+            - generic [ref=e58]:
+              - generic [ref=e59]: Controlled By
+              - paragraph [ref=e60]: The event operator only
+            - generic [ref=e61]:
+              - generic [ref=e62]: Do Next
+              - paragraph [ref=e63]: Use this endpoint until Fastest Finger First is complete.
+          - generic [ref=e64]: Open Quiz Operator
+        - link "Projector View Open Quiz Screen Quiz Screen Show the audience the screening and Fastest Finger First phases without exposing controls. Use On Projector or venue display Controlled By Operator-controlled from /host Do Next Use this projector page before Hot Seat begins. Open Quiz Screen" [ref=e65] [cursor=pointer]:
+          - /url: /screen
+          - generic [ref=e66]:
+            - generic [ref=e67]: Projector View
+            - generic [ref=e68]: Open Quiz Screen
+          - heading "Quiz Screen" [level=3] [ref=e69]
+          - paragraph [ref=e70]: Show the audience the screening and Fastest Finger First phases without exposing controls.
+          - generic [ref=e71]:
+            - generic [ref=e72]:
+              - generic [ref=e73]: Use On
+              - paragraph [ref=e74]: Projector or venue display
+            - generic [ref=e75]:
+              - generic [ref=e76]: Controlled By
+              - paragraph [ref=e77]: Operator-controlled from /host
+            - generic [ref=e78]:
+              - generic [ref=e79]: Do Next
+              - paragraph [ref=e80]: Use this projector page before Hot Seat begins.
+          - generic [ref=e81]: Open Quiz Screen
+        - link "Operator Only Open Hot Seat Operator Hot Seat Operator Run the dedicated Hot Seat round, select the spoken answer, reveal outcomes, and manage lifelines. Use On Operator laptop during Hot Seat Controlled By The event operator only Do Next Use this only after Fastest Finger First decides the team. Open Hot Seat Operator" [ref=e82] [cursor=pointer]:
+          - /url: /hotseat-host
+          - generic [ref=e83]:
+            - generic [ref=e84]: Operator Only
+            - generic [ref=e85]: Open Hot Seat Operator
+          - heading "Hot Seat Operator" [level=3] [ref=e86]
+          - paragraph [ref=e87]: Run the dedicated Hot Seat round, select the spoken answer, reveal outcomes, and manage lifelines.
+          - generic [ref=e88]:
+            - generic [ref=e89]:
+              - generic [ref=e90]: Use On
+              - paragraph [ref=e91]: Operator laptop during Hot Seat
+            - generic [ref=e92]:
+              - generic [ref=e93]: Controlled By
+              - paragraph [ref=e94]: The event operator only
+            - generic [ref=e95]:
+              - generic [ref=e96]: Do Next
+              - paragraph [ref=e97]: Use this only after Fastest Finger First decides the team.
+          - generic [ref=e98]: Open Hot Seat Operator
+        - link "Hot Seat Projector Open Hot Seat Screen Hot Seat Screen Project only the dedicated Hot Seat question, ladder, lifelines, and result states to the audience. Use On Projector during Hot Seat Controlled By Operator-controlled from /hotseat-host Do Next Switch the projector here for the Hot Seat round. Open Hot Seat Screen" [ref=e99] [cursor=pointer]:
+          - /url: /hotseat-screen
+          - generic [ref=e100]:
+            - generic [ref=e101]: Hot Seat Projector
+            - generic [ref=e102]: Open Hot Seat Screen
+          - heading "Hot Seat Screen" [level=3] [ref=e103]
+          - paragraph [ref=e104]: Project only the dedicated Hot Seat question, ladder, lifelines, and result states to the audience.
+          - generic [ref=e105]:
+            - generic [ref=e106]:
+              - generic [ref=e107]: Use On
+              - paragraph [ref=e108]: Projector during Hot Seat
+            - generic [ref=e109]:
+              - generic [ref=e110]: Controlled By
+              - paragraph [ref=e111]: Operator-controlled from /hotseat-host
+            - generic [ref=e112]:
+              - generic [ref=e113]: Do Next
+              - paragraph [ref=e114]: Switch the projector here for the Hot Seat round.
+          - generic [ref=e115]: Open Hot Seat Screen
+      - generic [ref=e116]:
+        - generic [ref=e117]:
+          - heading "Shared Address" [level=3] [ref=e118]
+          - paragraph [ref=e119]: This device is currently serving the quiz at the address below. Use the same base address on the private router for every screen in the venue.
+          - generic [ref=e120]: http://127.0.0.1:3000
+          - paragraph [ref=e121]: If this laptop is the host machine on the venue router, share this base address plus the route for each role.
+        - generic [ref=e122]:
+          - heading "Event Flow" [level=3] [ref=e123]
+          - list [ref=e124]:
+            - listitem [ref=e125]:
+              - strong [ref=e126]: 1. Screening Round
+              - text: Teams answer the MCQ screening on /play within five minutes.
+            - listitem [ref=e127]:
+              - strong [ref=e128]: 2. Fastest Finger First
+              - text: Qualified teams arrange the options in the correct order.
+            - listitem [ref=e129]:
+              - strong [ref=e130]: 3. Hot Seat
+              - text: Move to /hotseat-host and /hotseat-screen. Participant devices stop interacting at this stage.
+    - paragraph [ref=e131]: Operator PIN is set in server.js or via the ADMIN_PIN environment variable.

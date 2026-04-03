@@ -1,0 +1,27 @@
+{
+  "name": "jal-jevan-kbc-quiz",
+  "version": "1.0.0",
+  "description": "KBC Type Quiz for Jal Jeevan Event",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "quiz",
+    "kbc",
+    "jal-jevan",
+    "websocket"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.3"
+  }
+}

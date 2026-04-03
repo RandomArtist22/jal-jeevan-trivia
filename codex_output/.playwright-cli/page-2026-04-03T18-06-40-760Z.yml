@@ -1,0 +1,63 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - main [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - generic [ref=e8]: Jal Jeevan Trivia
+          - heading "Quiz Screen" [level=1] [ref=e9]
+          - paragraph [ref=e10]: Screening & Fastest Finger First
+        - generic [ref=e11]:
+          - strong [ref=e12]: Quiz Projector
+          - paragraph [ref=e13]: Project this page for screening and Fastest Finger First only. Hot Seat uses its own projector endpoint.
+          - paragraph [ref=e14]: Controlled from http://127.0.0.1:3080/host
+      - generic [ref=e15]:
+        - generic [ref=e17]:
+          - heading "Quiz Screen Is Ready" [level=3] [ref=e18]
+          - paragraph [ref=e19]: Teams should join on http://127.0.0.1:3080/play. The operator should control screening and Fastest Finger First from http://127.0.0.1:3080/host.
+        - complementary [ref=e20]:
+          - generic [ref=e21]:
+            - heading "Leaderboard" [level=3] [ref=e22]
+            - list
+          - generic [ref=e23]:
+            - heading "Live Notice" [level=3] [ref=e24]
+            - paragraph [ref=e25]: Waiting for teams to join the river.
+          - generic [ref=e26]:
+            - heading "Score Ladder" [level=3] [ref=e27]
+            - generic [ref=e28]:
+              - generic [ref=e29]:
+                - strong [ref=e30]: Q8
+                - generic [ref=e31]: Question
+                - generic [ref=e32]: 5,000
+              - generic [ref=e33]:
+                - strong [ref=e34]: Q7
+                - generic [ref=e35]: Question
+                - generic [ref=e36]: 2,000
+              - generic [ref=e37]:
+                - strong [ref=e38]: Q6
+                - generic [ref=e39]: Safe Level
+                - generic [ref=e40]: 1,000
+              - generic [ref=e41]:
+                - strong [ref=e42]: Q5
+                - generic [ref=e43]: Question
+                - generic [ref=e44]: "500"
+              - generic [ref=e45]:
+                - strong [ref=e46]: Q4
+                - generic [ref=e47]: Question
+                - generic [ref=e48]: "100"
+              - generic [ref=e49]:
+                - strong [ref=e50]: Q3
+                - generic [ref=e51]: Question
+                - generic [ref=e52]: "50"
+              - generic [ref=e53]:
+                - strong [ref=e54]: Q2
+                - generic [ref=e55]: Safe Level
+                - generic [ref=e56]: "20"
+              - generic [ref=e57]:
+                - strong [ref=e58]: Q1
+                - generic [ref=e59]: Question
+                - generic [ref=e60]: "10"
+          - generic [ref=e61]:
+            - heading "Phase Guide" [level=3] [ref=e62]
+            - paragraph [ref=e63]: Project this page for screening and Fastest Finger First only. Hot Seat uses its own projector endpoint.

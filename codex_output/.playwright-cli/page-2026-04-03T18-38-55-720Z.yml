@@ -1,0 +1,77 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - main [ref=e4]:
+    - generic [ref=e46]:
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - generic [ref=e49]: Operator Console
+          - generic [ref=e50]:
+            - link "Hot Seat" [ref=e51] [cursor=pointer]:
+              - /url: /hotseat-host
+            - link "Home" [ref=e52] [cursor=pointer]:
+              - /url: /
+        - heading "Screening + FFF" [level=1] [ref=e54]
+        - generic [ref=e55]:
+          - generic [ref=e56]: Lobby
+          - generic [ref=e57]: 1 teams
+          - generic [ref=e58]: 0 qualified
+          - generic [ref=e59]: 0 online
+      - generic [ref=e61]:
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - heading "Console" [level=2] [ref=e64]
+            - tablist [ref=e65]:
+              - tab "Stage" [selected] [ref=e66] [cursor=pointer]
+              - tab "Teams" [ref=e67] [cursor=pointer]
+              - tab "Switch" [ref=e68] [cursor=pointer]
+          - generic [ref=e69]:
+            - article [ref=e70]:
+              - generic [ref=e71]:
+                - heading "Screening" [level=3] [ref=e72]
+                - generic [ref=e73]: idle
+              - generic [ref=e74]:
+                - button "Start" [ref=e75] [cursor=pointer]
+                - button "Stop" [disabled] [ref=e76]
+                - button "Qualify" [disabled] [ref=e77]
+              - generic [ref=e78]: No screening rank yet.
+            - article [ref=e79]:
+              - generic [ref=e80]:
+                - heading "Fastest Finger" [level=3] [ref=e81]
+                - generic [ref=e82]: idle
+              - generic [ref=e83]:
+                - generic [ref=e84]:
+                  - generic [ref=e85]: Question
+                  - combobox "Question" [ref=e86]:
+                    - option "FFF 1" [selected]
+                    - option "FFF 2"
+                    - option "FFF 3"
+                - button "Start" [ref=e87] [cursor=pointer]
+              - generic [ref=e88]:
+                - button "Rank" [disabled] [ref=e89]
+                - link "Hot Seat" [ref=e90] [cursor=pointer]:
+                  - /url: /hotseat-host
+              - generic [ref=e91]: No FFF rank yet.
+        - complementary [ref=e92]:
+          - article [ref=e93]:
+            - generic [ref=e94]:
+              - generic [ref=e95]:
+                - generic [ref=e96]: Audience
+                - strong [ref=e97]: "0"
+              - generic [ref=e98]:
+                - generic [ref=e99]: Completed
+                - strong [ref=e100]: "0"
+              - generic [ref=e101]:
+                - generic [ref=e102]: FFF Winner
+                - strong [ref=e103]: "--"
+              - generic [ref=e104]:
+                - generic [ref=e105]: Notice
+                - strong [ref=e106]: Host console connected.
+          - article [ref=e107]:
+            - generic [ref=e108]:
+              - generic [ref=e109]:
+                - generic [ref=e110]: Notice
+                - textbox "Notice" [ref=e111]: Host console connected.
+              - generic [ref=e112]:
+                - button "Update" [ref=e113] [cursor=pointer]
+                - button "Reset" [ref=e114] [cursor=pointer]

@@ -1,0 +1,63 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - main [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - generic [ref=e8]: Jal Jeevan Trivia
+          - heading "Hot Seat Screen" [level=1] [ref=e9]
+          - paragraph [ref=e10]: Dedicated Hot Seat Round
+        - generic [ref=e11]:
+          - strong [ref=e12]: Hot Seat Projector
+          - paragraph [ref=e13]: Keep this page ready for the Hot Seat round. It is separate from the screening and Fastest Finger First projector view.
+          - paragraph [ref=e14]: Controlled from http://127.0.0.1:3080/hotseat-host
+      - generic [ref=e15]:
+        - generic [ref=e17]:
+          - heading "Hot Seat Screen Is Ready" [level=3] [ref=e18]
+          - paragraph [ref=e19]: Keep this projector page ready for the dedicated Hot Seat round. The operator controls it from http://127.0.0.1:3080/hotseat-host.
+        - complementary [ref=e20]:
+          - generic [ref=e21]:
+            - heading "Live Notice" [level=3] [ref=e22]
+            - paragraph [ref=e23]: Waiting for teams to join the river.
+          - generic [ref=e24]:
+            - heading "Score Ladder" [level=3] [ref=e25]
+            - generic [ref=e26]:
+              - generic [ref=e27]:
+                - strong [ref=e28]: Q8
+                - generic [ref=e29]: Question
+                - generic [ref=e30]: 5,000
+              - generic [ref=e31]:
+                - strong [ref=e32]: Q7
+                - generic [ref=e33]: Question
+                - generic [ref=e34]: 2,000
+              - generic [ref=e35]:
+                - strong [ref=e36]: Q6
+                - generic [ref=e37]: Safe Level
+                - generic [ref=e38]: 1,000
+              - generic [ref=e39]:
+                - strong [ref=e40]: Q5
+                - generic [ref=e41]: Question
+                - generic [ref=e42]: "500"
+              - generic [ref=e43]:
+                - strong [ref=e44]: Q4
+                - generic [ref=e45]: Question
+                - generic [ref=e46]: "100"
+              - generic [ref=e47]:
+                - strong [ref=e48]: Q3
+                - generic [ref=e49]: Question
+                - generic [ref=e50]: "50"
+              - generic [ref=e51]:
+                - strong [ref=e52]: Q2
+                - generic [ref=e53]: Safe Level
+                - generic [ref=e54]: "20"
+              - generic [ref=e55]:
+                - strong [ref=e56]: Q1
+                - generic [ref=e57]: Question
+                - generic [ref=e58]: "10"
+          - generic [ref=e59]:
+            - heading "Lifelines" [level=3] [ref=e60]
+            - generic [ref=e61]:
+              - generic [ref=e62]: 50/50
+              - generic [ref=e63]: Audience Poll
+              - generic [ref=e64]: Call a Friend

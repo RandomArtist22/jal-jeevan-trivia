@@ -1,0 +1,43 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#app"
+  - main [ref=e4]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: Player Portal · Team Devices Only
+      - heading "Play From This Device" [level=1] [ref=e8]
+      - paragraph [ref=e9]: Register one team here and keep this page open.
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - heading "Team Registration" [level=3] [ref=e12]
+          - paragraph [ref=e13]: One device should remain linked to one team through screening, Fastest Finger First, and the Hot Seat.
+          - generic [ref=e14]:
+            - generic [ref=e15]:
+              - generic [ref=e16]: Team Name
+              - textbox "Team Name" [ref=e17]:
+                - /placeholder: Blue Current…
+            - generic [ref=e18]:
+              - generic [ref=e19]: Team Members
+              - textbox "Team Members" [ref=e20]:
+                - /placeholder: Asha & Rohan…
+            - generic [ref=e21]:
+              - generic [ref=e22]: Entry Type
+              - combobox "Entry Type" [ref=e23]:
+                - option "Registered Team" [selected]
+                - option "Audience Entry"
+          - button "Register Team" [ref=e24] [cursor=pointer]
+        - generic [ref=e25]:
+          - heading "What To Do Here" [level=3] [ref=e26]
+          - list [ref=e27]:
+            - listitem [ref=e28]:
+              - strong [ref=e29]: Register once.
+              - text: This device stays linked to the team and reconnects automatically after refresh.
+            - listitem [ref=e30]:
+              - strong [ref=e31]: Answer only on this page.
+              - text: Screening and Fastest Finger First both happen here on the team device.
+            - listitem [ref=e32]:
+              - strong [ref=e33]: Stop here after Fastest Finger First.
+              - text: Hot Seat is run only by the operator on separate dedicated endpoints.
+          - status [ref=e34]:
+            - strong [ref=e35]: Current Address
+            - paragraph [ref=e36]: http://127.0.0.1:3000/play
+          - paragraph [ref=e37]: If a different team must use this device later, use the reset button after registration.
