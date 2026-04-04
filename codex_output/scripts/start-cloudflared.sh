@@ -8,6 +8,9 @@ CLOUDFLARED_BIN="${CLOUDFLARED_BIN:-cloudflared}"
 CLOUDFLARED_PROTOCOL="${CLOUDFLARED_PROTOCOL:-http2}"
 CLOUDFLARED_EDGE_IP_VERSION="${CLOUDFLARED_EDGE_IP_VERSION:-4}"
 CLOUDFLARED_LOG_LEVEL="${CLOUDFLARED_LOG_LEVEL:-info}"
+CLOUDFLARED_TUNNEL_TOKEN="${CLOUDFLARED_TUNNEL_TOKEN:-}"
+CLOUDFLARED_PUBLIC_URL="${CLOUDFLARED_PUBLIC_URL:-}"
+RUNTIME_PUBLIC_URL_FILE="${ROOT_DIR}/.runtime-public-base-url"
 SERVER_LOG="$(mktemp)"
 TUNNEL_LOG="$(mktemp)"
 SERVER_PID=""
@@ -22,6 +25,7 @@ cleanup() {
     kill "${TUNNEL_PID}" 2>/dev/null || true
     wait "${TUNNEL_PID}" 2>/dev/null || true
   fi
+  rm -f "${RUNTIME_PUBLIC_URL_FILE}"
   rm -f "${SERVER_LOG}" "${TUNNEL_LOG}"
 }
 
@@ -68,14 +72,26 @@ extract_public_url() {
 }
 
 start_tunnel() {
-  local -a command=(
-    "${CLOUDFLARED_BIN}" tunnel
-    --url "http://${HOST_BIND}:${PORT}"
-    --protocol "${CLOUDFLARED_PROTOCOL}"
-    --edge-ip-version "${CLOUDFLARED_EDGE_IP_VERSION}"
-    --loglevel "${CLOUDFLARED_LOG_LEVEL}"
-    --no-autoupdate
-  )
+  local -a command
+  if [[ -n "${CLOUDFLARED_TUNNEL_TOKEN}" ]]; then
+    command=(
+      "${CLOUDFLARED_BIN}" tunnel run
+      --token "${CLOUDFLARED_TUNNEL_TOKEN}"
+      --protocol "${CLOUDFLARED_PROTOCOL}"
+      --edge-ip-version "${CLOUDFLARED_EDGE_IP_VERSION}"
+      --loglevel "${CLOUDFLARED_LOG_LEVEL}"
+      --no-autoupdate
+    )
+  else
+    command=(
+      "${CLOUDFLARED_BIN}" tunnel
+      --url "http://${HOST_BIND}:${PORT}"
+      --protocol "${CLOUDFLARED_PROTOCOL}"
+      --edge-ip-version "${CLOUDFLARED_EDGE_IP_VERSION}"
+      --loglevel "${CLOUDFLARED_LOG_LEVEL}"
+      --no-autoupdate
+    )
+  fi
 
   if command -v stdbuf >/dev/null 2>&1; then
     stdbuf -oL -eL "${command[@]}" >"${TUNNEL_LOG}" 2>&1 &
@@ -85,42 +101,58 @@ start_tunnel() {
   TUNNEL_PID=$!
 }
 
-echo "Starting local server on http://${HOST_BIND}:${PORT}"
-start_server ""
-wait_for_local_server
-
-echo "Opening Cloudflare quick tunnel"
-start_tunnel
-
-PUBLIC_URL=""
-for _ in $(seq 1 120); do
-  if ! kill -0 "${TUNNEL_PID}" 2>/dev/null; then
-    echo "cloudflared exited unexpectedly:" >&2
-    cat "${TUNNEL_LOG}" >&2
-    exit 1
-  fi
-  PUBLIC_URL="$(extract_public_url || true)"
-  if [[ -n "${PUBLIC_URL}" ]]; then
-    break
-  fi
-  sleep 0.5
-done
-
-if [[ -z "${PUBLIC_URL}" ]]; then
-  echo "Timed out waiting for the Cloudflare tunnel URL." >&2
-  echo "Recent cloudflared logs:" >&2
-  tail -n 60 "${TUNNEL_LOG}" >&2
+if [[ -n "${CLOUDFLARED_TUNNEL_TOKEN}" && -z "${CLOUDFLARED_PUBLIC_URL}" ]]; then
+  echo "CLOUDFLARED_PUBLIC_URL is required when using CLOUDFLARED_TUNNEL_TOKEN." >&2
   exit 1
 fi
 
-echo "Tunnel ready at ${PUBLIC_URL}"
-kill "${SERVER_PID}" 2>/dev/null || true
-wait "${SERVER_PID}" 2>/dev/null || true
-SERVER_PID=""
+rm -f "${RUNTIME_PUBLIC_URL_FILE}"
 
-echo "Restarting server with PUBLIC_BASE_URL"
+MODE="quick"
+PUBLIC_URL=""
+if [[ -n "${CLOUDFLARED_TUNNEL_TOKEN}" ]]; then
+  MODE="named"
+  PUBLIC_URL="${CLOUDFLARED_PUBLIC_URL%/}"
+fi
+
+echo "Starting local server on http://${HOST_BIND}:${PORT}"
 start_server "${PUBLIC_URL}"
 wait_for_local_server
+
+if [[ "${MODE}" == "named" ]]; then
+  echo "Opening Cloudflare named tunnel"
+else
+  echo "Opening Cloudflare quick tunnel"
+fi
+start_tunnel
+
+if [[ "${MODE}" == "quick" ]]; then
+  for _ in $(seq 1 120); do
+    if ! kill -0 "${TUNNEL_PID}" 2>/dev/null; then
+      echo "cloudflared exited unexpectedly:" >&2
+      cat "${TUNNEL_LOG}" >&2
+      exit 1
+    fi
+    PUBLIC_URL="$(extract_public_url || true)"
+    if [[ -n "${PUBLIC_URL}" ]]; then
+      break
+    fi
+    sleep 0.5
+  done
+
+  if [[ -z "${PUBLIC_URL}" ]]; then
+    echo "Timed out waiting for the Cloudflare tunnel URL." >&2
+    echo "Recent cloudflared logs:" >&2
+    tail -n 60 "${TUNNEL_LOG}" >&2
+    exit 1
+  fi
+
+  echo "Tunnel ready at ${PUBLIC_URL}"
+  printf '%s\n' "${PUBLIC_URL}" > "${RUNTIME_PUBLIC_URL_FILE}"
+  echo "Runtime public URL saved without restarting the local server"
+else
+  echo "Named tunnel running at ${PUBLIC_URL}"
+fi
 
 cat <<EOF
 

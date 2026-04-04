@@ -24,8 +24,12 @@ const ui = {
   fffDraftOrder: [],
   fffSubmitting: false,
   projectorAudio: null,
+  projectorAudioContext: null,
   projectorCueId: 0,
-  projectorAudioBlocked: false
+  projectorAudioBlocked: false,
+  projectorAudioPrimed: false,
+  soundDurations: {},
+  soundDurationLoading: {}
 };
 
 function escapeHtml(value) {
@@ -167,6 +171,12 @@ function formatMs(ms) {
   const minutes = Math.floor(total / 60);
   const seconds = total % 60;
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function formatDurationSeconds(seconds) {
+  const numeric = Number(seconds);
+  if (!Number.isFinite(numeric) || numeric < 0) return "--";
+  return formatMs(numeric * 1000);
 }
 
 function formatElapsedMs(ms) {
@@ -432,6 +442,28 @@ function getSoundTrack(trackId) {
   return getState().config?.soundLibrary?.find((track) => track.id === trackId) || null;
 }
 
+function ensureSoundDurationsLoaded(state) {
+  if (page !== "soundboard") return;
+  const tracks = state.config?.soundLibrary || [];
+  for (const track of tracks) {
+    if (ui.soundDurations[track.id] !== undefined || ui.soundDurationLoading[track.id]) continue;
+    ui.soundDurationLoading[track.id] = true;
+    const audio = new Audio();
+    audio.preload = "metadata";
+    audio.src = track.path;
+    audio.addEventListener("loadedmetadata", () => {
+      ui.soundDurations[track.id] = Number.isFinite(audio.duration) ? audio.duration : null;
+      delete ui.soundDurationLoading[track.id];
+      render();
+    }, { once: true });
+    audio.addEventListener("error", () => {
+      ui.soundDurations[track.id] = null;
+      delete ui.soundDurationLoading[track.id];
+      render();
+    }, { once: true });
+  }
+}
+
 function getSoundboardInstruction(state) {
   if (state.sound.status === "playing" && state.sound.track?.label) {
     return `${state.sound.track.label} is live on both projector endpoints. Stop or replace it from this desk whenever needed.`;
@@ -478,13 +510,25 @@ function renderElapsedMonitor(label, startedAt) {
 }
 
 function renderProjectorAudioPrompt(state) {
+  if (!isProjectorPage()) return "";
+  if (!ui.projectorAudioPrimed) {
+    return `
+      <div class="status-callout idle">
+        <strong>Arm Projector Audio</strong>
+        <p>Tap once on this projector device before the event so sound cues can start instantly.</p>
+        <div class="inline-actions tight">
+          <button class="button compact-button" type="button" data-action="enable-projector-audio">Arm Audio</button>
+        </div>
+      </div>
+    `;
+  }
   if (!ui.projectorAudioBlocked || state.sound.status !== "playing") return "";
   return `
     <div class="status-callout danger">
       <strong>Enable Projector Audio</strong>
       <p>Tap once on this device to allow ${escapeHtml(state.sound.track?.label || "the current cue")} to play.</p>
       <div class="inline-actions tight">
-        <button class="button compact-button" type="button" data-action="enable-projector-audio">Enable Audio</button>
+        <button class="button compact-button" type="button" data-action="enable-projector-audio">Retry Audio</button>
       </div>
     </div>
   `;
@@ -867,6 +911,8 @@ function ensureProjectorAudio() {
   if (ui.projectorAudio) return ui.projectorAudio;
   const audio = new Audio();
   audio.preload = "auto";
+  audio.playsInline = true;
+  audio.crossOrigin = "anonymous";
   audio.addEventListener("ended", () => {
     const state = getState();
     if (state.sound?.status === "playing" && Number(state.sound.cueId || 0) === Number(ui.projectorCueId || 0)) {
@@ -881,6 +927,38 @@ function stopProjectorAudio() {
   if (!ui.projectorAudio) return;
   ui.projectorAudio.pause();
   ui.projectorAudio.currentTime = 0;
+}
+
+async function primeProjectorAudio() {
+  const audio = ensureProjectorAudio();
+  const silentClip = "data:audio/wav;base64,UklGRlQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YTAAAAA=";
+  try {
+    if (!ui.projectorAudioContext && typeof window.AudioContext === "function") {
+      ui.projectorAudioContext = new window.AudioContext();
+    } else if (!ui.projectorAudioContext && typeof window.webkitAudioContext === "function") {
+      ui.projectorAudioContext = new window.webkitAudioContext();
+    }
+
+    if (ui.projectorAudioContext?.state === "suspended") {
+      await ui.projectorAudioContext.resume();
+    }
+
+    audio.muted = true;
+    audio.src = silentClip;
+    await audio.play();
+    audio.pause();
+    audio.currentTime = 0;
+    audio.removeAttribute("src");
+    audio.load();
+    audio.muted = false;
+    ui.projectorAudioPrimed = true;
+    ui.projectorAudioBlocked = false;
+    render();
+  } catch {
+    ui.projectorAudioPrimed = false;
+    ui.projectorAudioBlocked = true;
+    render();
+  }
 }
 
 function syncProjectorAudioState(forceRetry = false) {
@@ -1537,11 +1615,23 @@ function renderSoundCueLibrary(state) {
       ${tracks
         .map((track) => {
           const isActive = state.sound.status === "playing" && state.sound.trackId === track.id;
+          const durationValue = ui.soundDurations[track.id];
+          const durationLabel = ui.soundDurationLoading[track.id]
+            ? "Loading..."
+            : durationValue === undefined
+              ? "Loading..."
+              : durationValue === null
+                ? "Unavailable"
+                : formatDurationSeconds(durationValue);
           return `
             <article class="glass-card compact-card compact-stack sound-cue-card ${isActive ? "is-active" : ""}">
               <div class="panel-title-row">
                 <h3>${escapeHtml(track.label)}</h3>
                 <span class="pill ${isActive ? "active" : "idle"}">${escapeHtml(isActive ? "live" : "ready")}</span>
+              </div>
+              <div class="compact-grid compact-grid-2">
+                ${renderCompactStat("Duration", durationLabel)}
+                ${renderCompactStat("File", track.fileName || track.path.split("/").pop() || "--")}
               </div>
               <div class="url-banner mono">${escapeHtml(track.path)}</div>
               <div class="inline-actions tight">
@@ -1556,48 +1646,44 @@ function renderSoundCueLibrary(state) {
   `;
 }
 
+function renderTimerSnapshot(label, chipLabel, timerMarkup, stats = []) {
+  return `
+    <article class="glass-card compact-card compact-stack">
+      <div class="panel-title-row">
+        <h3>${escapeHtml(label)}</h3>
+        <span class="pill idle">${escapeHtml(chipLabel)}</span>
+      </div>
+      ${timerMarkup}
+      ${stats.length ? `<div class="compact-grid compact-grid-2">${stats.join("")}</div>` : ""}
+    </article>
+  `;
+}
+
 function renderSoundboardStageDesk(state) {
-  if (state.phase === "screening") {
-    return `
-      <article class="glass-card compact-card compact-stack">
-        <div class="panel-title-row">
-          <h3>Screening Live</h3>
-          <span class="pill active">Round</span>
-        </div>
-        ${renderMiniTimer("Screening", state.screening.endsAt, state.screening.startedAt)}
-        <div class="compact-grid compact-grid-2">
-          ${renderCompactStat("Teams", formatNumber(state.teams.length))}
-          ${renderCompactStat("Responses", formatNumber(Object.keys(state.screening.responses || {}).length))}
-        </div>
-      </article>
-    `;
-  }
+  const screeningTimer = state.screening.startedAt
+    ? renderMiniTimer("Screening", state.screening.endsAt, state.screening.startedAt, state.screening.status === "active"
+      ? {}
+      : {
+          stopped: true,
+          remainingMs: getFrozenRemainingMs(state.screening.endsAt),
+          totalMs: (state.screening.endsAt || 0) - (state.screening.startedAt || 0),
+          reason: state.screening.status === "ended" ? "Closed" : "Standby"
+        })
+    : renderStatusCallout("Screening Idle", "The screening round has not started yet.", "idle");
 
-  if (state.phase === "fff") {
-    return `
-      <article class="glass-card compact-card compact-stack">
-        <div class="panel-title-row">
-          <h3>FFF Live</h3>
-          <span class="pill ${state.fff.status === "active" ? "active" : "pending"}">${escapeHtml(state.fff.status)}</span>
-        </div>
-        ${renderMiniTimer("FFF", state.fff.endsAt, state.fff.startedAt, state.fff.status === "active"
-          ? {}
-          : {
-              stopped: true,
-              remainingMs: getFrozenRemainingMs(state.fff.endsAt),
-              totalMs: (state.fff.endsAt || 0) - (state.fff.startedAt || 0),
-              reason: "Closed"
-            })}
-        <div class="compact-grid compact-grid-2">
-          ${renderCompactStat("Submissions", formatNumber(state.fff.submissionCount || 0))}
-          ${renderCompactStat("Winner", getTeam(state.fff.winnerTeamId)?.name || "--")}
-        </div>
-      </article>
-    `;
-  }
+  const fffTimer = state.fff.startedAt
+    ? renderMiniTimer("FFF", state.fff.endsAt, state.fff.startedAt, state.fff.status === "active"
+      ? {}
+      : {
+          stopped: true,
+          remainingMs: getFrozenRemainingMs(state.fff.endsAt),
+          totalMs: (state.fff.endsAt || 0) - (state.fff.startedAt || 0),
+          reason: state.fff.status === "locked" ? "Ranked" : "Closed"
+        })
+    : renderStatusCallout("FFF Idle", "Fastest Finger First is not running right now.", "idle");
 
-  if (state.phase === "hotseat" && state.hotSeat.question) {
-    const answerTimer = state.hotSeat.optionsVisible
+  const hotSeatAnswerTimer = state.hotSeat.question
+    ? state.hotSeat.optionsVisible
       ? renderMiniTimer("Answer", state.hotSeat.endsAt, state.hotSeat.startedAt, {
           paused: state.hotSeat.timerState === "paused",
           stopped: state.hotSeat.timerState === "stopped",
@@ -1605,43 +1691,41 @@ function renderSoundboardStageDesk(state) {
           totalMs: state.hotSeat.questionDurationMs,
           reason: state.hotSeat.timerPauseReason
         })
-      : renderStatusCallout("Question First", "Options are still hidden. The answer timer has not started yet.", "idle");
-    const callTimer = state.hotSeat.callTimer?.timerState && state.hotSeat.callTimer.timerState !== "idle"
-      ? renderMiniTimer("Call A Friend", state.hotSeat.callTimer.endsAt, state.hotSeat.callTimer.startedAt, {
-          paused: state.hotSeat.callTimer.timerState === "paused",
-          stopped: state.hotSeat.callTimer.timerState === "stopped",
-          remainingMs: state.hotSeat.callTimer.timerRemainingMs,
-          totalMs: state.hotSeat.callTimer.durationMs,
-          reason: state.hotSeat.callTimer.timerPauseReason
-        })
-      : "";
-    return `
-      <article class="glass-card compact-card compact-stack">
-        <div class="panel-title-row">
-          <h3>Hot Seat Live</h3>
-          <span class="pill ${state.hotSeat.status === "locked" ? "pending" : "active"}">${escapeHtml(state.hotSeat.status)}</span>
-        </div>
-        <div class="compact-grid compact-grid-2">
-          ${renderCompactStat("Team", state.hotSeat.activeTeam?.name || "--")}
-          ${renderCompactStat("Question", `Q${formatNumber((state.hotSeat.questionIndex || 0) + 1)}`)}
-          ${renderCompactStat("Value", `${formatNumber(state.hotSeat.question.points || 0)} pts`)}
-          ${renderCompactStat("Poll", state.hotSeat.audiencePoll?.status || "idle")}
-        </div>
-        <div class="status-callout idle">
-          <strong>${escapeHtml(state.hotSeat.question.topic || "Hot Seat")}</strong>
-          <p>${escapeHtml(state.hotSeat.question.question)}</p>
-        </div>
-        ${answerTimer}
-        ${callTimer}
-      </article>
-    `;
-  }
+      : renderStatusCallout("Question First", "Options are hidden. The Hot Seat answer timer has not started yet.", "idle")
+    : renderStatusCallout("Hot Seat Idle", "No Hot Seat question is active right now.", "idle");
 
-  if (state.phase === "intermission") {
-    return renderStatusCallout("Intermission", "Hot Seat handoff is in progress. Keep the cue desk ready for the next round.", "idle");
-  }
+  const callFriendTimer = state.hotSeat.callTimer?.timerState && state.hotSeat.callTimer.timerState !== "idle"
+    ? renderMiniTimer("Call A Friend", state.hotSeat.callTimer.endsAt, state.hotSeat.callTimer.startedAt, {
+        paused: state.hotSeat.callTimer.timerState === "paused",
+        stopped: state.hotSeat.callTimer.timerState === "stopped",
+        remainingMs: state.hotSeat.callTimer.timerRemainingMs,
+        totalMs: state.hotSeat.callTimer.durationMs,
+        reason: state.hotSeat.callTimer.timerPauseReason
+      })
+    : renderStatusCallout("Call A Friend Idle", "The call timer is currently not active.", "idle");
 
-  return renderStatusCallout("Standby", "No live round timer is running. Use opening cues as the venue resets.", "idle");
+  return `
+    <div class="compact-stack">
+      ${renderTimerSnapshot("Screening Timer", state.screening.status || "idle", screeningTimer, [
+        renderCompactStat("Teams", formatNumber(state.teams.length)),
+        renderCompactStat("Responses", formatNumber(Object.keys(state.screening.responses || {}).length))
+      ])}
+      ${renderTimerSnapshot("FFF Timer", state.fff.status || "idle", fffTimer, [
+        renderCompactStat("Submissions", formatNumber(state.fff.submissionCount || 0)),
+        renderCompactStat("Winner", getTeam(state.fff.winnerTeamId)?.name || "--")
+      ])}
+      ${renderTimerSnapshot("Hot Seat Answer", state.hotSeat.status || "idle", hotSeatAnswerTimer, [
+        renderCompactStat("Team", state.hotSeat.activeTeam?.name || "--"),
+        renderCompactStat("Question", state.hotSeat.question ? `Q${formatNumber((state.hotSeat.questionIndex || 0) + 1)}` : "--"),
+        renderCompactStat("Value", state.hotSeat.question ? `${formatNumber(state.hotSeat.question.points || 0)} pts` : "--"),
+        renderCompactStat("Poll", state.hotSeat.audiencePoll?.status || "idle")
+      ])}
+      ${renderTimerSnapshot("Call A Friend", state.hotSeat.callTimer?.timerState || "idle", callFriendTimer, [
+        renderCompactStat("Call State", state.hotSeat.callTimer?.timerState || "idle"),
+        renderCompactStat("Pause Reason", state.hotSeat.callTimer?.timerPauseReason || "--")
+      ])}
+    </div>
+  `;
 }
 
 function renderSoundboard() {
@@ -2036,15 +2120,6 @@ function renderScreen() {
           <article class="glass-card compact-card compact-stack">
             <h3>${state.phase === "screening" ? "Screening Rank" : state.phase === "fff" ? "FFF Rank" : "Leaderboard"}</h3>
             ${renderCompactRows(state.phase === "screening" ? screeningRows : state.phase === "fff" ? fffRows : scoreRows, "No ranking yet.")}
-          </article>
-          <article class="glass-card compact-card compact-stack">
-            <h3>Audio Feed</h3>
-            <div class="compact-grid compact-grid-2">
-              ${renderCompactStat("Cue", state.sound.track?.label || "None")}
-              ${renderCompactStat("Status", state.sound.status || "stopped")}
-              ${renderCompactStat("Started", state.sound.startedAt ? prettyDate(state.sound.startedAt) : "--")}
-              ${renderElapsedMonitor("Elapsed", state.sound.startedAt)}
-            </div>
           </article>
           <article class="glass-card compact-card compact-stack">
             <h3>Stage Notice</h3>
@@ -2462,15 +2537,6 @@ function renderHotSeatScreen() {
               ? renderAudiencePoll(hotSeat, question, { showQr: true, compactQr: true, projector: true })
               : `
                 <article class="glass-card compact-card compact-stack">
-                  <h3>Audio Feed</h3>
-                  <div class="compact-grid compact-grid-2">
-                    ${renderCompactStat("Cue", state.sound.track?.label || "None")}
-                    ${renderCompactStat("Status", state.sound.status || "stopped")}
-                    ${renderCompactStat("Started", state.sound.startedAt ? prettyDate(state.sound.startedAt) : "--")}
-                    ${renderElapsedMonitor("Elapsed", state.sound.startedAt)}
-                  </div>
-                </article>
-                <article class="glass-card compact-card compact-stack">
                   <h3>Ladder</h3>
                   ${renderScoreLadder(state)}
                 </article>
@@ -2522,6 +2588,7 @@ function render() {
 
   bindEvents();
   updateDynamicBits();
+  ensureSoundDurationsLoaded(getState());
   syncProjectorAudioState();
 }
 
@@ -2652,8 +2719,9 @@ function bindEvents() {
 
   app.querySelectorAll("[data-action='enable-projector-audio']").forEach((button) => {
     button.addEventListener("click", () => {
-      ui.projectorAudioBlocked = false;
-      syncProjectorAudioState(true);
+      primeProjectorAudio().then(() => {
+        syncProjectorAudioState(true);
+      });
     });
   });
 

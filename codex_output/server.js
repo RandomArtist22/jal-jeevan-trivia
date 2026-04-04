@@ -9,6 +9,7 @@ const PORT = Number(process.env.PORT || 3000);
 const ADMIN_PIN = process.env.ADMIN_PIN || "jaljeevan-admin";
 const PLAYER_PIN = process.env.PLAYER_PIN || "jaljeevan-player";
 const PUBLIC_BASE_URL = String(process.env.PUBLIC_BASE_URL || "").trim().replace(/\/+$/, "");
+const RUNTIME_PUBLIC_BASE_URL_FILE = path.join(__dirname, ".runtime-public-base-url");
 const PUBLIC_DIR = path.join(__dirname, "public");
 const AUDIO_DIR = path.join(PUBLIC_DIR, "audio");
 const QUESTION_BANK = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "questions.json"), "utf8"));
@@ -37,15 +38,26 @@ const AUDIO_LABELS = {
   opening_audio: "Opening",
   fastest_fingers_first_audio: "Fastest Fingers First",
   question_audio: "Question Bed",
-  call_a_friend_audio: "Call A Friend"
+  call_a_friend_audio: "Call A Friend",
+  lock_question: "Lock Answer",
+  correct_question: "Correct Answer"
 };
-const AUDIO_ORDER = ["opening_audio", "fastest_fingers_first_audio", "question_audio", "call_a_friend_audio"];
+const AUDIO_ORDER = [
+  "opening_audio",
+  "fastest_fingers_first_audio",
+  "question_audio",
+  "lock_question",
+  "correct_question",
+  "call_a_friend_audio"
+];
 
 const MIME_TYPES = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "application/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
+  ".mp3": "audio/mpeg",
+  ".mpeg": "audio/mpeg",
   ".png": "image/png",
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
@@ -71,6 +83,16 @@ function loadEnvFile(filePath) {
       value = value.slice(1, -1);
     }
     process.env[key] = value;
+  }
+}
+
+function getPublicBaseUrl() {
+  if (PUBLIC_BASE_URL) return PUBLIC_BASE_URL;
+  if (!fs.existsSync(RUNTIME_PUBLIC_BASE_URL_FILE)) return "";
+  try {
+    return String(fs.readFileSync(RUNTIME_PUBLIC_BASE_URL_FILE, "utf8")).trim().replace(/\/+$/, "");
+  } catch {
+    return "";
   }
 }
 
@@ -174,7 +196,7 @@ function createInitialState() {
 }
 
 function publicRoute(pathname = "") {
-  return `${PUBLIC_BASE_URL || ""}${pathname}`;
+  return `${getPublicBaseUrl()}${pathname}`;
 }
 
 let state = createInitialState();
@@ -306,7 +328,7 @@ function buildStateForClient(client) {
     config: {
       eventTitle: state.eventTitle,
       eventSubtitle: state.eventSubtitle,
-      publicBaseUrl: PUBLIC_BASE_URL,
+      publicBaseUrl: getPublicBaseUrl(),
       hasPlayerPassword: Boolean(PLAYER_PIN),
       screeningDurationMs: state.screening.durationMs,
       fffDurationMs: state.fff.durationMs,

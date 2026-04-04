@@ -33,9 +33,18 @@ PORT=3080 npm start
 
 ## Run with Cloudflare Tunnel
 
-The app can run on your laptop while teams join through a public `trycloudflare.com` link.
+Use a named Cloudflare tunnel for event use. The `trycloudflare.com` quick tunnel is still supported, but it is only best-effort and can be intermittent.
 
-Start both the local server and the Cloudflare quick tunnel with:
+### Stable mode: named tunnel
+
+Set these values in `.env` or your shell:
+
+```text
+CLOUDFLARED_TUNNEL_TOKEN=your-cloudflare-tunnel-token
+CLOUDFLARED_PUBLIC_URL=https://quiz.example.com
+```
+
+Then start everything with:
 
 ```bash
 npm run start:cloudflared
@@ -47,12 +56,26 @@ If you need a different local port:
 PORT=3080 npm run start:cloudflared
 ```
 
-What this does:
+What this does in named-tunnel mode:
+
+- starts the quiz server on your laptop with `PUBLIC_BASE_URL` already set
+- runs `cloudflared tunnel run --token ...`
+- keeps the operator UI and route tiles aligned to your stable public hostname
+
+### Fallback mode: quick tunnel
+
+If you do not provide `CLOUDFLARED_TUNNEL_TOKEN`, the launcher falls back to a `trycloudflare.com` quick tunnel:
+
+```bash
+npm run start:cloudflared
+```
+
+In quick-tunnel mode it:
 
 - starts the quiz server on your laptop
 - opens a `cloudflared` quick tunnel to that local port
-- captures the public tunnel URL
-- restarts the quiz server with `PUBLIC_BASE_URL` set so the operator UI shows the public share links
+- captures the temporary public tunnel URL
+- writes the tunnel URL to a runtime file so the app can advertise the public links without restarting the local server
 
 The launcher forces:
 
@@ -60,6 +83,10 @@ The launcher forces:
 - `--edge-ip-version 4`
 
 This avoids the common `failed to dial to edge with quic` timeout on networks that block UDP/QUIC.
+
+Quick tunnels are useful for testing, but if you are seeing a link that sometimes responds and sometimes does not, move to the named-tunnel setup above.
+
+The launcher now avoids restarting the local quiz server after the quick tunnel URL is discovered. That removes one avoidable source of dropouts, but it does not change the underlying best-effort nature of `trycloudflare.com`.
 
 The script prints shareable URLs for:
 
@@ -72,7 +99,7 @@ The script prints shareable URLs for:
 
 You can still keep the operator on the local URL, for example `http://127.0.0.1:3000/host`, while participants use the public Cloudflare link.
 
-If you want to run `cloudflared` manually, use:
+If you want to run a quick tunnel manually, use:
 
 ```bash
 cloudflared tunnel --url http://127.0.0.1:3000 --protocol http2 --edge-ip-version 4 --no-autoupdate
