@@ -22,7 +22,10 @@ const ui = {
   pendingScreeningAnswers: {},
   fffDraftQuestionKey: "",
   fffDraftOrder: [],
-  fffSubmitting: false
+  fffSubmitting: false,
+  projectorAudio: null,
+  projectorCueId: 0,
+  projectorAudioBlocked: false
 };
 
 function escapeHtml(value) {
@@ -43,9 +46,10 @@ function getState() {
     completedHotSeatTeams: [],
     privateTeam: null,
     session: { canPlay: false, audienceVoteIndex: -1 },
-    config: { publicBaseUrl: "", safeLevels: [], hotSeatLadder: [] },
+    config: { publicBaseUrl: "", safeLevels: [], hotSeatLadder: [], soundLibrary: [] },
     screening: { questions: [], responses: {}, rankings: [] },
     fff: { ranked: [], eligibleTeams: [], mySubmission: null },
+    sound: { trackId: "", status: "stopped", cueId: 0, track: null },
     hotSeat: {
       optionsVisible: false,
       lifelinesUsed: [],
@@ -241,6 +245,12 @@ function getLoadingMeta() {
         title: "Loading Vote Page",
         copy: "Connecting this device to the live audience poll."
       };
+    case "soundboard":
+      return {
+        eyebrow: "Soundboard",
+        title: "Loading Cue Desk",
+        copy: "Syncing the available sound cues and the live stage timing feed."
+      };
     case "home":
     default:
       return {
@@ -418,6 +428,30 @@ function getHotSeatScreenInstruction(state) {
   return "Keep this page ready for the Hot Seat round. It is separate from the screening and Fastest Finger First projector view.";
 }
 
+function getSoundTrack(trackId) {
+  return getState().config?.soundLibrary?.find((track) => track.id === trackId) || null;
+}
+
+function getSoundboardInstruction(state) {
+  if (state.sound.status === "playing" && state.sound.track?.label) {
+    return `${state.sound.track.label} is live on both projector endpoints. Stop or replace it from this desk whenever needed.`;
+  }
+
+  if (state.phase === "screening") {
+    return "Screening is active. Use this desk to trigger opening or transition cues without leaving the projector pages.";
+  }
+
+  if (state.phase === "fff") {
+    return "Fastest Finger First is active. Keep the cue desk open so you can fire the round bed and cut it instantly when needed.";
+  }
+
+  if (state.phase === "hotseat") {
+    return "Hot Seat is active. Use this desk for question and lifeline cues while watching the answer and call timers.";
+  }
+
+  return "This endpoint is the dedicated audio control surface for the event. It broadcasts to /screen and /hotseat-screen together.";
+}
+
 function renderHtmlList(items, { ordered = false, className = "checklist" } = {}) {
   const tag = ordered ? "ol" : "ul";
   return `<${tag} class="${className}">${items.map((item) => `<li>${item}</li>`).join("")}</${tag}>`;
@@ -428,6 +462,30 @@ function renderStatusCallout(title, copy, tone = "active") {
     <div class="status-callout ${escapeHtml(tone)}" role="status" aria-live="polite">
       <strong>${escapeHtml(title)}</strong>
       <p>${escapeHtml(copy)}</p>
+    </div>
+  `;
+}
+
+function renderElapsedMonitor(label, startedAt) {
+  const validStart = Number(startedAt || 0);
+  const text = validStart ? formatElapsedMs(Math.max(0, serverNow() - validStart)) : "--";
+  return `
+    <div class="compact-stat">
+      <span class="kicker">${escapeHtml(label)}</span>
+      <strong class="mono" ${validStart ? `data-elapsed-start="${validStart}"` : ""}>${escapeHtml(text)}</strong>
+    </div>
+  `;
+}
+
+function renderProjectorAudioPrompt(state) {
+  if (!ui.projectorAudioBlocked || state.sound.status !== "playing") return "";
+  return `
+    <div class="status-callout danger">
+      <strong>Enable Projector Audio</strong>
+      <p>Tap once on this device to allow ${escapeHtml(state.sound.track?.label || "the current cue")} to play.</p>
+      <div class="inline-actions tight">
+        <button class="button compact-button" type="button" data-action="enable-projector-audio">Enable Audio</button>
+      </div>
     </div>
   `;
 }
@@ -801,6 +859,77 @@ function syncLocalUiFromState(state) {
   }
 }
 
+function isProjectorPage() {
+  return page === "screen" || page === "hotseat-screen";
+}
+
+function ensureProjectorAudio() {
+  if (ui.projectorAudio) return ui.projectorAudio;
+  const audio = new Audio();
+  audio.preload = "auto";
+  audio.addEventListener("ended", () => {
+    const state = getState();
+    if (state.sound?.status === "playing" && Number(state.sound.cueId || 0) === Number(ui.projectorCueId || 0)) {
+      send({ type: "sound-ended", cueId: state.sound.cueId });
+    }
+  });
+  ui.projectorAudio = audio;
+  return audio;
+}
+
+function stopProjectorAudio() {
+  if (!ui.projectorAudio) return;
+  ui.projectorAudio.pause();
+  ui.projectorAudio.currentTime = 0;
+}
+
+function syncProjectorAudioState(forceRetry = false) {
+  if (!isProjectorPage()) return;
+  const state = getState();
+  const cueId = Number(state.sound?.cueId || 0);
+  if (state.sound?.status !== "playing" || !state.sound?.trackId) {
+    stopProjectorAudio();
+    ui.projectorCueId = cueId;
+    ui.projectorAudioBlocked = false;
+    return;
+  }
+
+  if (ui.projectorAudioBlocked && !forceRetry && cueId === Number(ui.projectorCueId || 0)) {
+    return;
+  }
+
+  const track = state.sound.track || getSoundTrack(state.sound.trackId);
+  if (!track) return;
+
+  const audio = ensureProjectorAudio();
+  const expectedSrc = new URL(track.path, window.location.origin).href;
+  if (cueId === Number(ui.projectorCueId || 0) && audio.src === expectedSrc && !audio.paused && !forceRetry) {
+    return;
+  }
+  if (audio.src !== expectedSrc || cueId !== Number(ui.projectorCueId || 0)) {
+    audio.src = expectedSrc;
+    audio.currentTime = 0;
+  }
+
+  ui.projectorCueId = cueId;
+  const playAttempt = audio.play();
+  if (playAttempt && typeof playAttempt.catch === "function") {
+    playAttempt
+      .then(() => {
+        if (ui.projectorAudioBlocked) {
+          ui.projectorAudioBlocked = false;
+          render();
+        }
+      })
+      .catch(() => {
+        if (!ui.projectorAudioBlocked) {
+          ui.projectorAudioBlocked = true;
+          render();
+        }
+      });
+  }
+}
+
 function renderCompactRows(rows, emptyLabel = "Nothing yet.") {
   if (!rows.length) {
     return `<div class="empty-state compact-empty">${escapeHtml(emptyLabel)}</div>`;
@@ -904,6 +1033,7 @@ function renderHome() {
       <div class="compact-route-grid">
         ${renderRouteTile({ title: "Play", href: "/play", badge: "Teams", path: `${origin}/play` })}
         ${renderRouteTile({ title: "Quiz Host", href: "/host", badge: "Operator", path: `${origin}/host` })}
+        ${renderRouteTile({ title: "Soundboard", href: "/soundboard", badge: "Operator", path: `${origin}/soundboard` })}
         ${renderRouteTile({ title: "Quiz Screen", href: "/screen", badge: "Projector", path: `${origin}/screen` })}
         ${renderRouteTile({ title: "Hot Seat Host", href: "/hotseat-host", badge: "Operator", path: `${origin}/hotseat-host` })}
         ${renderRouteTile({ title: "Hot Seat Screen", href: "/hotseat-screen", badge: "Projector", path: `${origin}/hotseat-screen` })}
@@ -1374,6 +1504,214 @@ function renderAudiencePollPage() {
   );
 }
 
+function renderSoundStatusBlock(state) {
+  const currentTrack = state.sound.track || getSoundTrack(state.sound.trackId);
+  return `
+    <article class="glass-card compact-card compact-stack soundboard-now-card">
+      <div class="panel-title-row">
+        <h3>Now Playing</h3>
+        <span class="pill ${state.sound.status === "playing" ? "active" : "idle"}">${escapeHtml(state.sound.status === "playing" ? "live" : "stopped")}</span>
+      </div>
+      <div class="compact-grid compact-grid-2">
+        ${renderCompactStat("Cue", currentTrack?.label || "No cue")}
+        ${renderCompactStat("Projectors", "2 endpoints")}
+        ${renderCompactStat("Started", state.sound.startedAt ? prettyDate(state.sound.startedAt) : "--")}
+        ${renderElapsedMonitor("Elapsed", state.sound.startedAt)}
+      </div>
+      <p class="helper-copy">${escapeHtml(getSoundboardInstruction(state))}</p>
+      <div class="inline-actions tight">
+        <button class="ghost-button compact-button" type="button" data-host-action="sound-stop" ${state.sound.status === "playing" ? "" : "disabled"}>Stop Sound</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderSoundCueLibrary(state) {
+  const tracks = state.config.soundLibrary || [];
+  if (!tracks.length) {
+    return `<div class="empty-state compact-empty">No audio files were found in /public/audio.</div>`;
+  }
+
+  return `
+    <div class="soundboard-grid">
+      ${tracks
+        .map((track) => {
+          const isActive = state.sound.status === "playing" && state.sound.trackId === track.id;
+          return `
+            <article class="glass-card compact-card compact-stack sound-cue-card ${isActive ? "is-active" : ""}">
+              <div class="panel-title-row">
+                <h3>${escapeHtml(track.label)}</h3>
+                <span class="pill ${isActive ? "active" : "idle"}">${escapeHtml(isActive ? "live" : "ready")}</span>
+              </div>
+              <div class="url-banner mono">${escapeHtml(track.path)}</div>
+              <div class="inline-actions tight">
+                <button class="button compact-button" type="button" data-host-action="sound-play" data-track-id="${escapeHtml(track.id)}">${isActive ? "Restart" : "Play"}</button>
+                <button class="ghost-button compact-button" type="button" data-host-action="sound-stop" ${isActive ? "" : "disabled"}>Stop</button>
+              </div>
+            </article>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
+function renderSoundboardStageDesk(state) {
+  if (state.phase === "screening") {
+    return `
+      <article class="glass-card compact-card compact-stack">
+        <div class="panel-title-row">
+          <h3>Screening Live</h3>
+          <span class="pill active">Round</span>
+        </div>
+        ${renderMiniTimer("Screening", state.screening.endsAt, state.screening.startedAt)}
+        <div class="compact-grid compact-grid-2">
+          ${renderCompactStat("Teams", formatNumber(state.teams.length))}
+          ${renderCompactStat("Responses", formatNumber(Object.keys(state.screening.responses || {}).length))}
+        </div>
+      </article>
+    `;
+  }
+
+  if (state.phase === "fff") {
+    return `
+      <article class="glass-card compact-card compact-stack">
+        <div class="panel-title-row">
+          <h3>FFF Live</h3>
+          <span class="pill ${state.fff.status === "active" ? "active" : "pending"}">${escapeHtml(state.fff.status)}</span>
+        </div>
+        ${renderMiniTimer("FFF", state.fff.endsAt, state.fff.startedAt, state.fff.status === "active"
+          ? {}
+          : {
+              stopped: true,
+              remainingMs: getFrozenRemainingMs(state.fff.endsAt),
+              totalMs: (state.fff.endsAt || 0) - (state.fff.startedAt || 0),
+              reason: "Closed"
+            })}
+        <div class="compact-grid compact-grid-2">
+          ${renderCompactStat("Submissions", formatNumber(state.fff.submissionCount || 0))}
+          ${renderCompactStat("Winner", getTeam(state.fff.winnerTeamId)?.name || "--")}
+        </div>
+      </article>
+    `;
+  }
+
+  if (state.phase === "hotseat" && state.hotSeat.question) {
+    const answerTimer = state.hotSeat.optionsVisible
+      ? renderMiniTimer("Answer", state.hotSeat.endsAt, state.hotSeat.startedAt, {
+          paused: state.hotSeat.timerState === "paused",
+          stopped: state.hotSeat.timerState === "stopped",
+          remainingMs: state.hotSeat.timerRemainingMs,
+          totalMs: state.hotSeat.questionDurationMs,
+          reason: state.hotSeat.timerPauseReason
+        })
+      : renderStatusCallout("Question First", "Options are still hidden. The answer timer has not started yet.", "idle");
+    const callTimer = state.hotSeat.callTimer?.timerState && state.hotSeat.callTimer.timerState !== "idle"
+      ? renderMiniTimer("Call A Friend", state.hotSeat.callTimer.endsAt, state.hotSeat.callTimer.startedAt, {
+          paused: state.hotSeat.callTimer.timerState === "paused",
+          stopped: state.hotSeat.callTimer.timerState === "stopped",
+          remainingMs: state.hotSeat.callTimer.timerRemainingMs,
+          totalMs: state.hotSeat.callTimer.durationMs,
+          reason: state.hotSeat.callTimer.timerPauseReason
+        })
+      : "";
+    return `
+      <article class="glass-card compact-card compact-stack">
+        <div class="panel-title-row">
+          <h3>Hot Seat Live</h3>
+          <span class="pill ${state.hotSeat.status === "locked" ? "pending" : "active"}">${escapeHtml(state.hotSeat.status)}</span>
+        </div>
+        <div class="compact-grid compact-grid-2">
+          ${renderCompactStat("Team", state.hotSeat.activeTeam?.name || "--")}
+          ${renderCompactStat("Question", `Q${formatNumber((state.hotSeat.questionIndex || 0) + 1)}`)}
+          ${renderCompactStat("Value", `${formatNumber(state.hotSeat.question.points || 0)} pts`)}
+          ${renderCompactStat("Poll", state.hotSeat.audiencePoll?.status || "idle")}
+        </div>
+        <div class="status-callout idle">
+          <strong>${escapeHtml(state.hotSeat.question.topic || "Hot Seat")}</strong>
+          <p>${escapeHtml(state.hotSeat.question.question)}</p>
+        </div>
+        ${answerTimer}
+        ${callTimer}
+      </article>
+    `;
+  }
+
+  if (state.phase === "intermission") {
+    return renderStatusCallout("Intermission", "Hot Seat handoff is in progress. Keep the cue desk ready for the next round.", "idle");
+  }
+
+  return renderStatusCallout("Standby", "No live round timer is running. Use opening cues as the venue resets.", "idle");
+}
+
+function renderSoundboard() {
+  const state = getState();
+  const routeTiles = `
+    <div class="compact-route-grid compact-route-grid-host">
+      ${renderRouteTile({ title: "Soundboard", href: "/soundboard", badge: "Operator", path: routeUrl("/soundboard") })}
+      ${renderRouteTile({ title: "Quiz Screen", href: "/screen", badge: "Projector", path: routeUrl("/screen") })}
+      ${renderRouteTile({ title: "Hot Seat Screen", href: "/hotseat-screen", badge: "Projector", path: routeUrl("/hotseat-screen") })}
+      ${renderRouteTile({ title: "Quiz Host", href: "/host", badge: "Operator", path: routeUrl("/host") })}
+      ${renderRouteTile({ title: "Home", href: "/", badge: "Router", path: routeUrl("/") })}
+    </div>
+  `;
+
+  if (!state.session.isHost) {
+    return renderCompactShell(
+      renderCompactHeader({
+        eyebrow: "Soundboard",
+        title: "Unlock Cue Desk",
+        chips: [{ value: routeUrl("/soundboard") }]
+      }),
+      `
+        <div class="compact-grid compact-grid-main">
+          <form class="glass-card compact-card compact-stack" data-form="host-auth">
+            <div class="field">
+              <label for="soundboard-pin">PIN</label>
+              <input id="soundboard-pin" name="pin" type="password" required autocomplete="current-password" placeholder="jaljeevan-admin" />
+            </div>
+            <button class="button" type="submit">Unlock</button>
+            ${flashMarkup()}
+          </form>
+          ${routeTiles}
+        </div>
+      `,
+      "operator-compact soundboard-shell"
+    );
+  }
+
+  return renderCompactShell(
+    renderCompactHeader({
+      eyebrow: "Soundboard",
+      title: "Cue Desk",
+      right: `<div class="inline-actions tight"><a class="ghost-button compact-button" href="/screen">Quiz Screen</a><a class="ghost-button compact-button" href="/hotseat-screen">Hot Seat Screen</a></div>`,
+      chips: [
+        { value: phaseLabel(state.phase) },
+        { value: state.sound.track?.label || "No cue live" },
+        { value: state.notice || "Standby" }
+      ]
+    }),
+    `
+      <div class="compact-grid compact-grid-main">
+        <section class="glass-card compact-card compact-stack">
+          <div class="panel-title-row">
+            <h2 class="compact-section-title">Cue Library</h2>
+            <span class="pill ${state.sound.status === "playing" ? "active" : "idle"}">${escapeHtml(state.sound.status)}</span>
+          </div>
+          ${renderSoundCueLibrary(state)}
+          ${flashMarkup()}
+        </section>
+        <aside class="compact-sidebar">
+          ${renderSoundStatusBlock(state)}
+          ${renderSoundboardStageDesk(state)}
+          ${routeTiles}
+        </aside>
+      </div>
+    `,
+    "operator-compact soundboard-shell"
+  );
+}
+
 function renderHostRanking(rankings) {
   if (!rankings.length) return `<div class="empty-state">No ranking data yet.</div>`;
   return `
@@ -1428,6 +1766,7 @@ function renderHost() {
     <div class="compact-route-grid compact-route-grid-host">
       ${renderRouteTile({ title: "Play", href: "/play", badge: "Teams", path: routeUrl("/play") })}
       ${renderRouteTile({ title: "Quiz Host", href: "/host", badge: "Operator", path: routeUrl("/host") })}
+      ${renderRouteTile({ title: "Soundboard", href: "/soundboard", badge: "Operator", path: routeUrl("/soundboard") })}
       ${renderRouteTile({ title: "Quiz Screen", href: "/screen", badge: "Projector", path: routeUrl("/screen") })}
       ${renderRouteTile({ title: "Hot Seat Host", href: "/hotseat-host", badge: "Operator", path: routeUrl("/hotseat-host") })}
       ${renderRouteTile({ title: "Hot Seat Screen", href: "/hotseat-screen", badge: "Projector", path: routeUrl("/hotseat-screen") })}
@@ -1592,6 +1931,7 @@ function renderScoreLadder(state, limit = 6) {
 function renderScreen() {
   const state = getState();
   const fff = state.fff;
+  const soundLabel = state.sound.status === "playing" ? state.sound.track?.label || "Live cue" : "Audio off";
   const screeningRows = state.screening.rankings.slice(0, 6).map((entry, index) => ({
     html: `
       <strong>#${index + 1}</strong>
@@ -1682,16 +2022,29 @@ function renderScreen() {
       chips: [
         { value: phaseLabel(state.phase) },
         { value: `${formatNumber(state.teams.length)} teams` },
+        { value: soundLabel },
         { value: state.notice || "Standby" }
       ]
     }),
     `
       <div class="compact-grid compact-grid-main">
-        ${mainPanel}
+        <div class="compact-stack">
+          ${renderProjectorAudioPrompt(state)}
+          ${mainPanel}
+        </div>
         <aside class="compact-sidebar">
           <article class="glass-card compact-card compact-stack">
             <h3>${state.phase === "screening" ? "Screening Rank" : state.phase === "fff" ? "FFF Rank" : "Leaderboard"}</h3>
             ${renderCompactRows(state.phase === "screening" ? screeningRows : state.phase === "fff" ? fffRows : scoreRows, "No ranking yet.")}
+          </article>
+          <article class="glass-card compact-card compact-stack">
+            <h3>Audio Feed</h3>
+            <div class="compact-grid compact-grid-2">
+              ${renderCompactStat("Cue", state.sound.track?.label || "None")}
+              ${renderCompactStat("Status", state.sound.status || "stopped")}
+              ${renderCompactStat("Started", state.sound.startedAt ? prettyDate(state.sound.startedAt) : "--")}
+              ${renderElapsedMonitor("Elapsed", state.sound.startedAt)}
+            </div>
           </article>
           <article class="glass-card compact-card compact-stack">
             <h3>Stage Notice</h3>
@@ -1762,6 +2115,7 @@ function renderHotSeatHost() {
     <div class="compact-route-grid compact-route-grid-host">
       ${renderRouteTile({ title: "Hot Seat Host", href: "/hotseat-host", badge: "Operator", path: routeUrl("/hotseat-host") })}
       ${renderRouteTile({ title: "Hot Seat Screen", href: "/hotseat-screen", badge: "Projector", path: routeUrl("/hotseat-screen") })}
+      ${renderRouteTile({ title: "Soundboard", href: "/soundboard", badge: "Operator", path: routeUrl("/soundboard") })}
       ${renderRouteTile({ title: "Quiz Host", href: "/host", badge: "Operator", path: routeUrl("/host") })}
       ${renderRouteTile({ title: "Play", href: "/play", badge: "Teams", path: routeUrl("/play") })}
     </div>
@@ -1999,6 +2353,7 @@ function renderHotSeatScreen() {
   const state = getState();
   const hotSeat = state.hotSeat;
   const question = hotSeat.question;
+  const soundLabel = state.sound.status === "playing" ? state.sound.track?.label || "Live cue" : "Audio off";
   const hotSeatTimerMarkup = hotSeat.optionsVisible
     ? renderMiniTimer("Answer", hotSeat.endsAt, hotSeat.startedAt, {
         paused: hotSeat.timerState === "paused",
@@ -2091,17 +2446,30 @@ function renderHotSeatScreen() {
       chips: [
         { value: hotSeat.activeTeam?.name || "--" },
         { value: `${formatNumber(hotSeat.currentScore || 0)} pts` },
+        { value: soundLabel },
         { value: hotSeat.status || "standby" }
       ]
     }),
     `
       <div class="compact-grid compact-grid-main">
-        ${mainPanel}
+        <div class="compact-stack">
+          ${renderProjectorAudioPrompt(state)}
+          ${mainPanel}
+        </div>
         <aside class="compact-sidebar">
           ${
             hotSeat.audiencePoll && question
               ? renderAudiencePoll(hotSeat, question, { showQr: true, compactQr: true, projector: true })
               : `
+                <article class="glass-card compact-card compact-stack">
+                  <h3>Audio Feed</h3>
+                  <div class="compact-grid compact-grid-2">
+                    ${renderCompactStat("Cue", state.sound.track?.label || "None")}
+                    ${renderCompactStat("Status", state.sound.status || "stopped")}
+                    ${renderCompactStat("Started", state.sound.startedAt ? prettyDate(state.sound.startedAt) : "--")}
+                    ${renderElapsedMonitor("Elapsed", state.sound.startedAt)}
+                  </div>
+                </article>
                 <article class="glass-card compact-card compact-stack">
                   <h3>Ladder</h3>
                   ${renderScoreLadder(state)}
@@ -2140,6 +2508,8 @@ function render() {
     app.innerHTML = renderPlayer();
   } else if (page === "host") {
     app.innerHTML = renderHost();
+  } else if (page === "soundboard") {
+    app.innerHTML = renderSoundboard();
   } else if (page === "hotseat-host") {
     app.innerHTML = renderHotSeatHost();
   } else if (page === "screen") {
@@ -2152,6 +2522,7 @@ function render() {
 
   bindEvents();
   updateDynamicBits();
+  syncProjectorAudioState();
 }
 
 function bindEvents() {
@@ -2279,6 +2650,13 @@ function bindEvents() {
     });
   });
 
+  app.querySelectorAll("[data-action='enable-projector-audio']").forEach((button) => {
+    button.addEventListener("click", () => {
+      ui.projectorAudioBlocked = false;
+      syncProjectorAudioState(true);
+    });
+  });
+
   app.querySelectorAll("[data-host-action]").forEach((button) => {
     button.addEventListener("click", () => {
       const payload = {};
@@ -2286,6 +2664,7 @@ function bindEvents() {
       const form = button.closest("form");
       if (button.dataset.kind) payload.kind = button.dataset.kind;
       if (button.dataset.answerIndex !== undefined) payload.answerIndex = Number(button.dataset.answerIndex);
+      if (button.dataset.trackId) payload.trackId = String(button.dataset.trackId);
       if (action === "start-fff" && form) {
         payload.questionIndex = Number(new FormData(form).get("questionIndex"));
       }
@@ -2328,6 +2707,11 @@ function updateDynamicBits() {
     }
     const progress = ((now - startAt) / (endAt - startAt)) * 100;
     element.style.width = `${Math.max(0, Math.min(100, progress))}%`;
+  });
+
+  document.querySelectorAll("[data-elapsed-start]").forEach((element) => {
+    const startAt = Number(element.dataset.elapsedStart);
+    element.textContent = formatElapsedMs(Math.max(0, now - startAt));
   });
 }
 

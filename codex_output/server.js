@@ -10,6 +10,7 @@ const ADMIN_PIN = process.env.ADMIN_PIN || "jaljeevan-admin";
 const PLAYER_PIN = process.env.PLAYER_PIN || "jaljeevan-player";
 const PUBLIC_BASE_URL = String(process.env.PUBLIC_BASE_URL || "").trim().replace(/\/+$/, "");
 const PUBLIC_DIR = path.join(__dirname, "public");
+const AUDIO_DIR = path.join(PUBLIC_DIR, "audio");
 const QUESTION_BANK = JSON.parse(fs.readFileSync(path.join(__dirname, "data", "questions.json"), "utf8"));
 const HOT_SEAT_BANKS = {
   "set-1": {
@@ -32,6 +33,13 @@ const DEFAULT_HOT_SEAT_SET = "set-1";
 const SAFE_LEVELS = [50, 1000];
 const QUALIFIER_LIMIT = 8;
 const AUDIENCE_QUALIFIER_LIMIT = 2;
+const AUDIO_LABELS = {
+  opening_audio: "Opening",
+  fastest_fingers_first_audio: "Fastest Fingers First",
+  question_audio: "Question Bed",
+  call_a_friend_audio: "Call A Friend"
+};
+const AUDIO_ORDER = ["opening_audio", "fastest_fingers_first_audio", "question_audio", "call_a_friend_audio"];
 
 const MIME_TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -66,6 +74,34 @@ function loadEnvFile(filePath) {
   }
 }
 
+function buildSoundLibrary() {
+  if (!fs.existsSync(AUDIO_DIR)) return [];
+  const tracks = fs.readdirSync(AUDIO_DIR)
+    .filter((fileName) => fs.statSync(path.join(AUDIO_DIR, fileName)).isFile())
+    .map((fileName) => {
+      const extension = path.extname(fileName);
+      const id = path.basename(fileName, extension);
+      return {
+        id,
+        fileName,
+        label: AUDIO_LABELS[id] || id.replace(/[_-]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase()),
+        path: `/audio/${fileName}`
+      };
+    });
+
+  tracks.sort((left, right) => {
+    const leftIndex = AUDIO_ORDER.indexOf(left.id);
+    const rightIndex = AUDIO_ORDER.indexOf(right.id);
+    const normalizedLeft = leftIndex === -1 ? Number.MAX_SAFE_INTEGER : leftIndex;
+    const normalizedRight = rightIndex === -1 ? Number.MAX_SAFE_INTEGER : rightIndex;
+    return normalizedLeft - normalizedRight || left.label.localeCompare(right.label);
+  });
+
+  return tracks;
+}
+
+const SOUND_LIBRARY = buildSoundLibrary();
+
 function createInitialState() {
   return {
     eventTitle: "Jal Jeevan Trivia",
@@ -94,6 +130,13 @@ function createInitialState() {
       submissions: {},
       ranked: [],
       winnerTeamId: null
+    },
+    sound: {
+      trackId: "",
+      status: "stopped",
+      startedAt: null,
+      stoppedAt: null,
+      cueId: 0
     },
     hotSeat: {
       status: "idle",
@@ -171,6 +214,10 @@ function getHotSeatBank(questionSetKey = state.hotSeat.questionSetKey) {
 
 function getHotSeatQuestion() {
   return getHotSeatBank().questions[state.hotSeat.questionIndex] || null;
+}
+
+function getSoundTrack(trackId) {
+  return SOUND_LIBRARY.find((track) => track.id === trackId) || null;
 }
 
 function getFFFQuestion() {
@@ -267,6 +314,11 @@ function buildStateForClient(client) {
       qualifierLimit: QUALIFIER_LIMIT,
       audienceQualifierLimit: AUDIENCE_QUALIFIER_LIMIT,
       safeLevels: SAFE_LEVELS,
+      soundLibrary: SOUND_LIBRARY.map((track) => ({
+        id: track.id,
+        label: track.label,
+        path: track.path
+      })),
       hotSeatQuestionSets: Object.values(HOT_SEAT_BANKS).map((bank) => ({
         key: bank.key,
         label: bank.label,
@@ -315,6 +367,14 @@ function buildStateForClient(client) {
       mySubmission: team ? clone(state.fff.submissions[team.id] || null) : null,
       submissionCount: Object.keys(state.fff.submissions).length,
       eligibleTeams: getEligibleFFFTeams()
+    },
+    sound: {
+      trackId: state.sound.trackId,
+      status: state.sound.status,
+      startedAt: state.sound.startedAt,
+      stoppedAt: state.sound.stoppedAt,
+      cueId: state.sound.cueId,
+      track: state.sound.trackId ? getSoundTrack(state.sound.trackId) : null
     },
     hotSeat: {
       status: state.hotSeat.status,
@@ -879,6 +939,24 @@ function resetGame() {
   state = createInitialState();
 }
 
+function playSound(trackId) {
+  const track = getSoundTrack(trackId);
+  if (!track) return false;
+  state.sound.trackId = track.id;
+  state.sound.status = "playing";
+  state.sound.startedAt = Date.now();
+  state.sound.stoppedAt = null;
+  state.sound.cueId += 1;
+  return true;
+}
+
+function stopSound() {
+  if (state.sound.status !== "playing" && !state.sound.trackId) return false;
+  state.sound.status = "stopped";
+  state.sound.stoppedAt = Date.now();
+  return true;
+}
+
 function handleHostAction(action, payload = {}, client) {
   if (!client.isHost) {
     send(client, "error", { message: "Host authentication is required." });
@@ -909,6 +987,18 @@ function handleHostAction(action, payload = {}, client) {
       break;
     case "rank-fff":
       rankFFF();
+      break;
+    case "sound-play":
+      if (!playSound(String(payload.trackId || ""))) {
+        send(client, "error", { message: "Choose a valid sound cue." });
+        return;
+      }
+      break;
+    case "sound-stop":
+      if (!stopSound()) {
+        send(client, "error", { message: "No sound is currently playing." });
+        return;
+      }
       break;
     case "send-fff-winner-to-hotseat":
       if (!state.fff.winnerTeamId) {
@@ -1166,6 +1256,18 @@ function handleMessage(raw, client) {
     return;
   }
 
+  if (message.type === "sound-ended") {
+    if (
+      ["screen", "hotseat-screen"].includes(client.role)
+      && state.sound.status === "playing"
+      && Number(message.cueId) === Number(state.sound.cueId)
+    ) {
+      stopSound();
+      broadcast();
+    }
+    return;
+  }
+
   if (client.role === "audience-poll" && handleAudiencePollMessage(message, client)) {
     return;
   }
@@ -1232,6 +1334,7 @@ function serveStatic(request, response) {
     "/play": "play.html",
     "/audience-poll": "audience-poll.html",
     "/host": "host.html",
+    "/soundboard": "soundboard.html",
     "/screen": "screen.html",
     "/hotseat-host": "hotseat-host.html",
     "/hotseat-screen": "hotseat-screen.html"

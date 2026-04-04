@@ -607,6 +607,34 @@ a:focus-visible {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.soundboard-shell .compact-grid-main {
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.9fr);
+}
+
+.soundboard-grid {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sound-cue-card {
+  background:
+    radial-gradient(circle at top right, rgba(121, 214, 255, 0.1), transparent 35%),
+    rgba(255, 255, 255, 0.04);
+}
+
+.sound-cue-card.is-active,
+.soundboard-now-card {
+  background:
+    radial-gradient(circle at top right, rgba(255, 221, 120, 0.14), transparent 34%),
+    linear-gradient(180deg, rgba(10, 37, 80, 0.96), rgba(4, 20, 45, 0.9));
+}
+
+.sound-cue-card .url-banner {
+  min-height: 58px;
+  font-size: 0.78rem;
+}
+
 .compact-identity {
   display: flex;
   flex-direction: column;
@@ -1580,6 +1608,7 @@ a:focus-visible {
   .compact-route-grid,
   .compact-route-grid-host,
   .compact-team-grid,
+  .soundboard-grid,
   .compact-endpoints,
   .loading-grid,
   .player-briefing,
