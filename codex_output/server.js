@@ -594,9 +594,10 @@ function resetHotSeatForTeam(teamId) {
 }
 
 function getHotSeatAnswerWindowMs() {
-  const question = getHotSeatQuestion();
-  if (!question) return 60000;
-  return question.points <= 100 ? 45000 : 60000;
+  const level = Number(state.hotSeat.questionIndex || 0) + 1;
+  if (level <= 3) return 45000;
+  if (level <= 6) return 60000;
+  return 90000;
 }
 
 function getHotSeatTimerRemaining(now = Date.now()) {
