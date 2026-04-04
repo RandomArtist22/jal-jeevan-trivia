@@ -6,92 +6,215 @@
       "id": "scr-1",
       "topic": "General Knowledge",
       "question": "Which planet in our solar system is known as the Red Planet?",
-      "options": ["Earth", "Mars", "Venus", "Jupiter"],
+      "options": [
+        "Earth",
+        "Mars",
+        "Venus",
+        "Jupiter"
+      ],
       "answerIndex": 1
     },
     {
       "id": "scr-2",
       "topic": "Science & Technology",
       "question": "What does CPU stand for in computing?",
-      "options": ["Central Process Unit", "Central Processing Unit", "Computer Primary Unit", "Core Processing Utility"],
+      "options": [
+        "Central Process Unit",
+        "Central Processing Unit",
+        "Computer Primary Unit",
+        "Core Processing Utility"
+      ],
       "answerIndex": 1
     },
     {
       "id": "scr-3",
       "topic": "Sports",
       "question": "How many players are there in a standard football team on the field at one time?",
-      "options": ["9", "10", "11", "12"],
+      "options": [
+        "9",
+        "10",
+        "11",
+        "12"
+      ],
       "answerIndex": 2
     },
     {
       "id": "scr-4",
       "topic": "Entertainment",
       "question": "Which Indian city is widely known as the home of Bollywood?",
-      "options": ["Hyderabad", "Mumbai", "Chennai", "Kolkata"],
+      "options": [
+        "Hyderabad",
+        "Mumbai",
+        "Chennai",
+        "Kolkata"
+      ],
       "answerIndex": 1
     },
     {
       "id": "scr-5",
       "topic": "Academics",
       "question": "In chemistry, what is the chemical symbol for sodium?",
-      "options": ["S", "So", "Na", "Sd"],
+      "options": [
+        "S",
+        "So",
+        "Na",
+        "Sd"
+      ],
       "answerIndex": 2
     },
     {
       "id": "scr-6",
       "topic": "General Knowledge",
       "question": "Who wrote the Indian national song 'Vande Mataram'?",
-      "options": ["Rabindranath Tagore", "Bankim Chandra Chattopadhyay", "Sarojini Naidu", "Subramania Bharati"],
+      "options": [
+        "Rabindranath Tagore",
+        "Bankim Chandra Chattopadhyay",
+        "Sarojini Naidu",
+        "Subramania Bharati"
+      ],
       "answerIndex": 1
     },
     {
       "id": "scr-7",
       "topic": "Science & Technology",
       "question": "Which device is primarily used to measure electric current?",
-      "options": ["Voltmeter", "Thermometer", "Ammeter", "Barometer"],
+      "options": [
+        "Voltmeter",
+        "Thermometer",
+        "Ammeter",
+        "Barometer"
+      ],
       "answerIndex": 2
     },
     {
       "id": "scr-8",
       "topic": "General Knowledge",
       "question": "The river Ganga originates from which glacier?",
-      "options": ["Siachen Glacier", "Gangotri Glacier", "Pindari Glacier", "Zemu Glacier"],
+      "options": [
+        "Siachen Glacier",
+        "Gangotri Glacier",
+        "Pindari Glacier",
+        "Zemu Glacier"
+      ],
       "answerIndex": 1
     }
   ],
   "fastestFinger": [
     {
-      "id": "fff-1",
-      "prompt": "Arrange these stages in the natural water cycle from earliest to latest.",
+      "id": "fff-4",
+      "prompt": "Arrange these physical constants in increasing order of their numerical value in SI units.",
       "options": [
-        { "id": "evaporation", "text": "Evaporation" },
-        { "id": "condensation", "text": "Condensation" },
-        { "id": "precipitation", "text": "Precipitation" },
-        { "id": "collection", "text": "Collection" }
+        {
+          "id": "planck",
+          "text": "Planck’s Constant (h)"
+        },
+        {
+          "id": "light",
+          "text": "Speed of Light (c)"
+        },
+        {
+          "id": "gravitational",
+          "text": "Gravitational Constant (G)"
+        },
+        {
+          "id": "boltzmann",
+          "text": "Boltzmann Constant (k)"
+        }
       ],
-      "correctOrder": ["evaporation", "condensation", "precipitation", "collection"]
+      "correctOrder": [
+        "planck",
+        "boltzmann",
+        "gravitational",
+        "light"
+      ]
     },
     {
-      "id": "fff-2",
-      "prompt": "Arrange these Indian space missions in chronological order of launch.",
+      "id": "fff-5",
+      "prompt": "Arrange these Christopher Nolan films in the order of their theatrical release (from Oldest to Most Recent).",
       "options": [
-        { "id": "mangalyaan", "text": "Mars Orbiter Mission (Mangalyaan)" },
-        { "id": "chandrayaan1", "text": "Chandrayaan-1" },
-        { "id": "chandrayaan2", "text": "Chandrayaan-2" },
-        { "id": "adityal1", "text": "Aditya-L1" }
+        {
+          "id": "interstellar",
+          "text": "Interstellar"
+        },
+        {
+          "id": "inception",
+          "text": "Inception"
+        },
+        {
+          "id": "oppenheimer",
+          "text": "Oppenheimer"
+        },
+        {
+          "id": "tenet",
+          "text": "Tenet"
+        }
       ],
-      "correctOrder": ["chandrayaan1", "mangalyaan", "chandrayaan2", "adityal1"]
+      "correctOrder": [
+        "inception",
+        "interstellar",
+        "tenet",
+        "oppenheimer"
+      ]
     },
     {
-      "id": "fff-3",
-      "prompt": "Arrange these SI units from the smallest base quantity symbol to the largest according to the prefixes shown.",
+      "id": "fff-6",
+      "prompt": "Arrange these iconic mountain peaks in order of their height (from Highest to Lowest).",
       "options": [
-        { "id": "mm", "text": "Millimetre" },
-        { "id": "cm", "text": "Centimetre" },
-        { "id": "m", "text": "Metre" },
-        { "id": "km", "text": "Kilometre" }
+
+        {
+          "id": "k2",
+          "text": "K2 (Godwin-Austen)"
+        },
+                {
+          "id": "everest",
+          "text": "Mount Everest"
+        },
+                {
+          "id": "nanda_devi",
+          "text": "Nanda Devi"
+        },
+        {
+          "id": "kanchenjunga",
+          "text": "Kanchenjunga"
+        }
+
       ],
-      "correctOrder": ["mm", "cm", "m", "km"]
+      "correctOrder": [
+        "everest",
+        "k2",
+        "kanchenjunga",
+        "nanda_devi"
+      ]
+    },
+    {
+      "id": "fff-7",
+      "prompt": "Arrange these programming languages in the order of their first public release (from Oldest to Newest).",
+      "options": [
+
+        {
+          "id": "python",
+          "text": "Python"
+        },
+                {
+          "id": "php",
+          "text": "PHP"
+        },
+        {
+          "id": "java",
+          "text": "Java"
+        },
+                {
+          "id": "perl",
+          "text": "Perl"
+        }
+
+      ],
+      "correctOrder": [
+        "perl",
+        "python",
+        "java",
+        "php"
+      ]
     }
   ],
   "hotSeat": [
@@ -100,7 +223,12 @@
       "points": 10,
       "topic": "General Knowledge",
       "question": "Which gas do plants primarily absorb from the atmosphere for photosynthesis?",
-      "options": ["Oxygen", "Nitrogen", "Carbon dioxide", "Hydrogen"],
+      "options": [
+        "Oxygen",
+        "Nitrogen",
+        "Carbon dioxide",
+        "Hydrogen"
+      ],
       "answerIndex": 2
     },
     {
@@ -108,7 +236,12 @@
       "points": 20,
       "topic": "Sports",
       "question": "Which country won the ICC Men's Cricket World Cup in 2011?",
-      "options": ["India", "Australia", "England", "Sri Lanka"],
+      "options": [
+        "India",
+        "Australia",
+        "England",
+        "Sri Lanka"
+      ],
       "answerIndex": 0
     },
     {
@@ -116,7 +249,12 @@
       "points": 50,
       "topic": "Entertainment",
       "question": "Which movie features the song 'Naatu Naatu'?",
-      "options": ["Pushpa", "RRR", "Baahubali", "KGF"],
+      "options": [
+        "Pushpa",
+        "RRR",
+        "Baahubali",
+        "KGF"
+      ],
       "answerIndex": 1
     },
     {
@@ -124,7 +262,12 @@
       "points": 100,
       "topic": "Science & Technology",
       "question": "What is the SI unit of force?",
-      "options": ["Pascal", "Watt", "Newton", "Joule"],
+      "options": [
+        "Pascal",
+        "Watt",
+        "Newton",
+        "Joule"
+      ],
       "answerIndex": 2
     },
     {
@@ -132,7 +275,12 @@
       "points": 500,
       "topic": "Academics",
       "question": "In linear algebra, the determinant is defined only for which kind of matrix?",
-      "options": ["Triangular matrices only", "Square matrices", "Symmetric matrices only", "Sparse matrices only"],
+      "options": [
+        "Triangular matrices only",
+        "Square matrices",
+        "Symmetric matrices only",
+        "Sparse matrices only"
+      ],
       "answerIndex": 1
     },
     {
@@ -140,7 +288,12 @@
       "points": 1000,
       "topic": "General Knowledge",
       "question": "Which article of the Indian Constitution deals with the Right to Equality?",
-      "options": ["Article 14", "Article 19", "Article 21", "Article 32"],
+      "options": [
+        "Article 14",
+        "Article 19",
+        "Article 21",
+        "Article 32"
+      ],
       "answerIndex": 0
     },
     {
@@ -148,7 +301,12 @@
       "points": 2000,
       "topic": "Science & Technology",
       "question": "Which data structure uses the Last In, First Out principle?",
-      "options": ["Queue", "Graph", "Stack", "Heap"],
+      "options": [
+        "Queue",
+        "Graph",
+        "Stack",
+        "Heap"
+      ],
       "answerIndex": 2
     },
     {
@@ -156,7 +314,12 @@
       "points": 5000,
       "topic": "General Knowledge",
       "question": "Which Indian river is known as the 'Dakshin Ganga'?",
-      "options": ["Godavari", "Narmada", "Krishna", "Kaveri"],
+      "options": [
+        "Godavari",
+        "Narmada",
+        "Krishna",
+        "Kaveri"
+      ],
       "answerIndex": 0
     }
   ]
