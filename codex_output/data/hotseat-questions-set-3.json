@@ -1,74 +1,74 @@
 [
   {
-    "id": "set3-hot-1",
+    "id": "setc-hot-1",
     "points": 10,
-    "topic": "Set 3",
-    "question": "Replace this with Set 3 Question 1.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answerIndex": 0
+    "topic": "Entertainment",
+    "question": "Which legendary figure is widely honored as the \"Father of Indian Cinema\" for his work on the first Indian feature film, Raja Harishchandra?",
+    "options": ["Dada Kondke", "Dadasaheb Phalke", "V. Shantaram", "Satyajit Ray"],
+    "answerIndex": 1
   },
   {
-    "id": "set3-hot-2",
+    "id": "setc-hot-2",
     "points": 20,
-    "topic": "Set 3",
-    "question": "Replace this with Set 3 Question 2.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answerIndex": 0
+    "topic": "Entertainment",
+    "question": "Which of these blockbuster films does NOT feature Alia Bhatt in a lead or supporting acting role?",
+    "options": ["Rocky Aur Rani Kii Prem Kahaani", "Love Aaj Kal 2", "Gangubai Kathiawadi", "Brahmastra: Part One – Shiva"],
+    "answerIndex": 1
   },
   {
-    "id": "set3-hot-3",
+    "id": "setc-hot-3",
     "points": 50,
-    "topic": "Set 3",
-    "question": "Replace this with Set 3 Question 3.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answerIndex": 0
+    "topic": "Sports",
+    "question": "Which Formula 1 constructor holds the record for the most World Drivers' Championship titles in the history of the sport?",
+    "options": ["Red Bull Racing", "Ferrari", "McLaren", "Mercedes"],
+    "answerIndex": 1
   },
   {
-    "id": "set3-hot-4",
+    "id": "setc-hot-4",
     "points": 100,
-    "topic": "Set 3",
-    "question": "Replace this with Set 3 Question 4.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answerIndex": 0
+    "topic": "Geopolitics",
+    "question": "The \"G7\" consists of the world's most advanced industrialized economies. Which of these is currently the only Asian nation that is a permanent member of the G7?",
+    "options": ["South Korea", "India", "Japan", "China"],
+    "answerIndex": 2
   },
   {
-    "id": "set3-hot-5",
+    "id": "setc-hot-5",
     "points": 500,
-    "topic": "Set 3",
-    "question": "Replace this with Set 3 Question 5.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answerIndex": 0
+    "topic": "Technology",
+    "question": "Launched in 1991, what was the name of India's first indigenous supercomputer developed by C-DAC?",
+    "options": ["Vikram", "Prithvi", "Agni", "PARAM 8000"],
+    "answerIndex": 3
   },
   {
-    "id": "set3-hot-6",
+    "id": "setc-hot-6",
     "points": 1000,
-    "topic": "Set 3",
-    "question": "Replace this with Set 3 Question 6.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answerIndex": 0
+    "topic": "Science & Technology",
+    "question": "In 2024, India's first \"Small SMR\" (Small Modular Reactor) project was discussed for deployment. Which Indian PSU is the primary lead for this nuclear technology?",
+    "options": ["DRDO", "ONGC", "NPCIL", "ISRO"],
+    "answerIndex": 2
   },
   {
-    "id": "set3-hot-7",
+    "id": "setc-hot-7",
     "points": 2000,
-    "topic": "Set 3",
-    "question": "Replace this with Set 3 Question 7.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answerIndex": 0
+    "topic": "Technology",
+    "question": "Which of the following programming languages does NOT support object-oriented programming?",
+    "options": ["Groovy", "Kotlin", "OCaml", "CPython"],
+    "answerIndex": 2
   },
   {
-    "id": "set3-hot-8",
+    "id": "setc-hot-8",
     "points": 3000,
-    "topic": "Set 3",
-    "question": "Replace this with Set 3 Question 8.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answerIndex": 0
+    "topic": "Literature",
+    "question": "Which of these famous novels, later adapted into a celebrated TV series, was authored by Bhisham Sahni and deals with the harrowing events of the Partition?",
+    "options": ["Godan", "Train to Pakistan", "Tamas", "Gaban"],
+    "answerIndex": 2
   },
   {
-    "id": "set3-hot-9",
+    "id": "setc-hot-9",
     "points": 4000,
-    "topic": "Set 3",
-    "question": "Replace this with Set 3 Question 9.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answerIndex": 0
+    "topic": "Space",
+    "question": "The first human-made object to successfully perform a \"soft landing\" on a comet (67P) was the Philae lander. This was part of which space mission?",
+    "options": ["Cassini-Huygens", "Rosetta", "Hayabusa2", "Voyager 1"],
+    "answerIndex": 1
   }
 ]

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "set2-hot-1",
+    "points": 10,
+    "topic": "Set 2",
+    "question": "Replace this with Set 2 Question 1.",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "answerIndex": 0
+  },
+  {
+    "id": "set2-hot-2",
+    "points": 20,
+    "topic": "Set 2",
+    "question": "Replace this with Set 2 Question 2.",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "answerIndex": 0
+  },
+  {
+    "id": "set2-hot-3",
+    "points": 50,
+    "topic": "Set 2",
+    "question": "Replace this with Set 2 Question 3.",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "answerIndex": 0
+  },
+  {
+    "id": "set2-hot-4",
+    "points": 100,
+    "topic": "Set 2",
+    "question": "Replace this with Set 2 Question 4.",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "answerIndex": 0
+  },
+  {
+    "id": "set2-hot-5",
+    "points": 500,
+    "topic": "Set 2",
+    "question": "Replace this with Set 2 Question 5.",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "answerIndex": 0
+  },
+  {
+    "id": "set2-hot-6",
+    "points": 1000,
+    "topic": "Set 2",
+    "question": "Replace this with Set 2 Question 6.",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "answerIndex": 0
+  },
+  {
+    "id": "set2-hot-7",
+    "points": 2000,
+    "topic": "Set 2",
+    "question": "Replace this with Set 2 Question 7.",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "answerIndex": 0
+  },
+  {
+    "id": "set2-hot-8",
+    "points": 3000,
+    "topic": "Set 2",
+    "question": "Replace this with Set 2 Question 8.",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "answerIndex": 0
+  },
+  {
+    "id": "set2-hot-9",
+    "points": 4000,
+    "topic": "Set 2",
+    "question": "Replace this with Set 2 Question 9.",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "answerIndex": 0
+  }
+]

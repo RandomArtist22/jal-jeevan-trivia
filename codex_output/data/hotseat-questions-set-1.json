@@ -1,74 +1,74 @@
 [
   {
-    "id": "set1-hot-1",
+    "id": "seta-hot-1",
     "points": 10,
-    "topic": "General Knowledge",
-    "question": "Which gas do plants mainly absorb from the atmosphere for photosynthesis?",
-    "options": ["Oxygen", "Nitrogen", "Carbon dioxide", "Hydrogen"],
-    "answerIndex": 2
+    "topic": "Geography",
+    "question": "Often appearing in elementary geography, which Indian state is known as the \"Land of Five Rivers\"?",
+    "options": ["Rajasthan", "Haryana", "Uttar Pradesh", "Punjab"],
+    "answerIndex": 3
   },
   {
-    "id": "set1-hot-2",
+    "id": "seta-hot-2",
     "points": 20,
-    "topic": "Science",
-    "question": "What is the boiling point of water at sea level in degrees Celsius?",
-    "options": ["90", "95", "100", "110"],
+    "topic": "Religion/Culture",
+    "question": "'Good Friday' is observed by Christians to commemorate which of these events in the life of Jesus Christ?",
+    "options": ["Birth of Jesus Christ", "Rebirth of Jesus Christ", "Crucifixion of Jesus Christ", "Birth of St. Peter"],
     "answerIndex": 2
   },
   {
-    "id": "set1-hot-3",
+    "id": "seta-hot-3",
     "points": 50,
-    "topic": "India",
-    "question": "Which is the capital city of India?",
-    "options": ["Mumbai", "New Delhi", "Kolkata", "Chennai"],
-    "answerIndex": 1
-  },
-  {
-    "id": "set1-hot-4",
-    "points": 100,
-    "topic": "Mathematics",
-    "question": "How many sides does a hexagon have?",
-    "options": ["5", "6", "7", "8"],
-    "answerIndex": 1
-  },
-  {
-    "id": "set1-hot-5",
-    "points": 500,
     "topic": "Technology",
-    "question": "What does HTTP stand for?",
-    "options": ["HyperText Transfer Protocol", "HighText Transfer Protocol", "Hyper Transfer Text Process", "Host Transfer Text Protocol"],
+    "question": "Which British computer scientist is credited with inventing the World Wide Web (WWW) while working at CERN in 1989?",
+    "options": ["Robert Cailliau", "Tim Berners-Lee", "Vint Cerf", "Marc Andreessen"],
+    "answerIndex": 1
+  },
+  {
+    "id": "seta-hot-4",
+    "points": 100,
+    "topic": "History",
+    "question": "The capital city of the Mauryan Empire under Emperor Ashoka, which served as a major center of trade and administration, was:",
+    "options": ["Vaishali", "Ujjain", "Pataliputra", "Taxila"],
+    "answerIndex": 2
+  },
+  {
+    "id": "seta-hot-5",
+    "points": 500,
+    "topic": "Environment",
+    "question": "Located in the Bandipora district of Jammu and Kashmir, which of these is the largest natural freshwater lake in India?",
+    "options": ["Vembanad Lake", "Dal Lake", "Wular Lake", "Chilika Lake"],
+    "answerIndex": 2
+  },
+  {
+    "id": "seta-hot-6",
+    "points": 1000,
+    "topic": "Geopolitics",
+    "question": "The United States jointly develops National Advanced Surface-to-Air Missile Systems (NASAMS) with which country?",
+    "options": ["Norway", "Greece", "France", "Australia"],
     "answerIndex": 0
   },
   {
-    "id": "set1-hot-6",
-    "points": 1000,
-    "topic": "Geography",
-    "question": "Which is the longest river in the world?",
-    "options": ["Amazon", "Nile", "Yangtze", "Mississippi"],
-    "answerIndex": 1
-  },
-  {
-    "id": "set1-hot-7",
+    "id": "seta-hot-7",
     "points": 2000,
-    "topic": "History",
-    "question": "Who was the first President of independent India?",
-    "options": ["Jawaharlal Nehru", "Dr. Rajendra Prasad", "Sardar Patel", "Dr. S. Radhakrishnan"],
+    "topic": "Mythology",
+    "question": "In the Mahabharata, which warrior was born from the fire of a Yajna specifically to bring about the destruction of Dronacharya?",
+    "options": ["Abhimanyu", "Dhrishtadyumna", "Satyaki", "Shikhandi"],
     "answerIndex": 1
   },
   {
-    "id": "set1-hot-8",
+    "id": "seta-hot-8",
     "points": 3000,
-    "topic": "Space",
-    "question": "Which planet is known for having the most prominent ring system?",
-    "options": ["Jupiter", "Saturn", "Uranus", "Neptune"],
-    "answerIndex": 1
+    "topic": "Current Affairs",
+    "question": "India held the G20 presidency in 2023. In which city was the \"Second Trade and Investment Working Group (TIWG) Meeting\" held?",
+    "options": ["New Delhi", "Mumbai", "Bengaluru", "Ahmedabad"],
+    "answerIndex": 2
   },
   {
-    "id": "set1-hot-9",
+    "id": "seta-hot-9",
     "points": 4000,
-    "topic": "Constitution",
-    "question": "How many Fundamental Rights are currently guaranteed by the Constitution of India?",
-    "options": ["5", "6", "7", "8"],
+    "topic": "Literature",
+    "question": "Who was the first Indian writer to be awarded the prestigious Jnanpith Award for their contribution to literature?",
+    "options": ["Tarasankar Bandyopadhyay", "G. Sankara Kurup", "Ramdhari Singh Dinkar", "Sumitranandan Pant"],
     "answerIndex": 1
   }
 ]

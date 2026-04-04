@@ -1,74 +1,74 @@
 [
   {
-    "id": "set2-hot-1",
+    "id": "setb-hot-1",
     "points": 10,
-    "topic": "Set 2",
-    "question": "Replace this with Set 2 Question 1.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answerIndex": 0
+    "topic": "Sports",
+    "question": "Who was the first Indian athlete to win an individual Gold Medal at the Summer Olympic Games?",
+    "options": ["Milkha Singh", "Neeraj Chopra", "Abhinav Bindra", "PV Sindhu"],
+    "answerIndex": 2
   },
   {
-    "id": "set2-hot-2",
+    "id": "setb-hot-2",
     "points": 20,
-    "topic": "Set 2",
-    "question": "Replace this with Set 2 Question 2.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answerIndex": 0
+    "topic": "Technology",
+    "question": "What does the tech acronym \"OLED,\" commonly found in high-end smartphone and TV screens, stand for?",
+    "options": ["Orthogonal Light Electronic Device", "Organic Light Emitting Diode", "Optical Light Emitting Diode", "Optimized Laser Energy Display"],
+    "answerIndex": 1
   },
   {
-    "id": "set2-hot-3",
+    "id": "setb-hot-3",
     "points": 50,
-    "topic": "Set 2",
-    "question": "Replace this with Set 2 Question 3.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "topic": "Global Health",
+    "question": "In an effort to improve global vision care, which organization launched the 'Global Specs 2030' initiative?",
+    "options": ["World Health Organization (WHO)", "UNESCO", "Google", "World Bank"],
     "answerIndex": 0
   },
   {
-    "id": "set2-hot-4",
+    "id": "setb-hot-4",
     "points": 100,
-    "topic": "Set 2",
-    "question": "Replace this with Set 2 Question 4.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answerIndex": 0
+    "topic": "History",
+    "question": "The Champaran Satyagraha of 1917, Mahatma Gandhi's first major civil disobedience movement in India, was primarily against the forced cultivation of which crop?",
+    "options": ["Sugarcane", "Cotton", "Indigo", "Jute"],
+    "answerIndex": 2
   },
   {
-    "id": "set2-hot-5",
+    "id": "setb-hot-5",
     "points": 500,
-    "topic": "Set 2",
-    "question": "Replace this with Set 2 Question 5.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answerIndex": 0
+    "topic": "Geography",
+    "question": "The Sahara is the world's largest hot desert. Which of these countries contains the largest geographical portion of the Sahara?",
+    "options": ["Egypt", "Algeria", "Chad", "Morocco"],
+    "answerIndex": 1
   },
   {
-    "id": "set2-hot-6",
+    "id": "setb-hot-6",
     "points": 1000,
-    "topic": "Set 2",
-    "question": "Replace this with Set 2 Question 6.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answerIndex": 0
+    "topic": "Sports",
+    "question": "In the history of international cricket, which player holds the record for the most dismissals as a wicket-keeper?",
+    "options": ["MS Dhoni", "Mark Boucher", "Adam Gilchrist", "Kumar Sangakara"],
+    "answerIndex": 1
   },
   {
-    "id": "set2-hot-7",
+    "id": "setb-hot-7",
     "points": 2000,
-    "topic": "Set 2",
-    "question": "Replace this with Set 2 Question 7.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answerIndex": 0
+    "topic": "Mythology",
+    "question": "During the exile of the Pandavas, which forest-dwelling demon (Rakshasa) did Bhima defeat and subsequently marry his sister, Hidimbi?",
+    "options": ["Kirmira", "Jatasura", "Bakasura", "Hidimba"],
+    "answerIndex": 3
   },
   {
-    "id": "set2-hot-8",
+    "id": "setb-hot-8",
     "points": 3000,
-    "topic": "Set 2",
-    "question": "Replace this with Set 2 Question 8.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answerIndex": 0
+    "topic": "Current Affairs",
+    "question": "In early 2024, the Indian government announced the Bharat Ratna for Karpoori Thakur. He served as the Chief Minister of which state twice?",
+    "options": ["Odisha", "Bihar", "Uttar Pradesh", "Madhya Pradesh"],
+    "answerIndex": 1
   },
   {
-    "id": "set2-hot-9",
+    "id": "setb-hot-9",
     "points": 4000,
-    "topic": "Set 2",
-    "question": "Replace this with Set 2 Question 9.",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "topic": "History",
+    "question": "Which Pallava ruler is credited with commissioning the magnificent Shore Temple at Mahabalipuram?",
+    "options": ["Narasimhavarman II (Rajasimha)", "Mahendravarman I", "Nandivarman II", "Paramesvaravarman I"],
     "answerIndex": 0
   }
 ]
