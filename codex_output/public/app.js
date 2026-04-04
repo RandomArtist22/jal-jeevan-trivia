@@ -46,7 +46,14 @@ function getState() {
     config: { publicBaseUrl: "", safeLevels: [], hotSeatLadder: [] },
     screening: { questions: [], responses: {}, rankings: [] },
     fff: { ranked: [], eligibleTeams: [], mySubmission: null },
-    hotSeat: { lifelinesUsed: [], reducedOptionIndices: [], history: [], audiencePoll: null }
+    hotSeat: {
+      optionsVisible: false,
+      lifelinesUsed: [],
+      reducedOptionIndices: [],
+      history: [],
+      audiencePoll: null,
+      callTimer: { timerState: "idle", timerRemainingMs: 0, durationMs: 50000 }
+    }
   };
 }
 
@@ -1181,6 +1188,15 @@ function optionStateClass(index, question, hotSeat) {
   return classes.join(" ");
 }
 
+function renderHotSeatOptionsWaiting(copy) {
+  return `
+    <div class="status-callout idle">
+      <strong>Question is live</strong>
+      <p>${escapeHtml(copy)}</p>
+    </div>
+  `;
+}
+
 function renderAudiencePoll(hotSeat, question, options = {}) {
   if (!hotSeat.audiencePoll || !question) return "";
   const poll = hotSeat.audiencePoll;
@@ -1696,23 +1712,42 @@ function renderHotSeatHost() {
   const canStartWinner = Boolean(state.fff.winnerTeamId);
   const canStartManual = state.teams.length > 0;
   const canChangeQuestionSet = state.phase !== "hotseat";
-  const canSelectAnswer = state.phase === "hotseat" && hotSeat.status === "question-live" && hotSeat.question;
+  const canShowOptions = state.phase === "hotseat" && hotSeat.status === "question-live" && hotSeat.question && !hotSeat.optionsVisible;
+  const canSelectAnswer = state.phase === "hotseat" && hotSeat.status === "question-live" && hotSeat.question && hotSeat.optionsVisible;
   const canLockAnswer = canSelectAnswer && hotSeat.selectedAnswerIndex !== null;
   const canRevealAnswer = hotSeat.status === "locked";
   const canNextQuestion = hotSeat.status === "revealed";
   const canEndTurn = state.phase === "hotseat";
+  const canPauseTimer = state.phase === "hotseat" && hotSeat.status === "question-live" && hotSeat.optionsVisible && hotSeat.timerState === "running";
   const canResumeTimer = state.phase === "hotseat"
     && hotSeat.status === "question-live"
+    && hotSeat.optionsVisible
     && hotSeat.timerState === "paused"
-    && hotSeat.audiencePoll?.status !== "open";
+    && hotSeat.audiencePoll?.status !== "open"
+    && !["running", "paused"].includes(hotSeat.callTimer?.timerState || "idle");
+  const canResetTimer = state.phase === "hotseat" && hotSeat.status === "question-live" && hotSeat.optionsVisible;
   const canLockAudiencePoll = state.phase === "hotseat" && hotSeat.status === "question-live" && hotSeat.audiencePoll?.status === "open";
-  const hotSeatTimerMarkup = renderMiniTimer("Answer", hotSeat.endsAt, hotSeat.startedAt, {
-    paused: hotSeat.timerState === "paused",
-    stopped: hotSeat.timerState === "stopped",
-    remainingMs: hotSeat.timerRemainingMs,
-    totalMs: hotSeat.questionDurationMs,
-    reason: hotSeat.timerPauseReason
-  });
+  const hotSeatTimerMarkup = hotSeat.optionsVisible
+    ? renderMiniTimer("Answer", hotSeat.endsAt, hotSeat.startedAt, {
+        paused: hotSeat.timerState === "paused",
+        stopped: hotSeat.timerState === "stopped",
+        remainingMs: hotSeat.timerRemainingMs,
+        totalMs: hotSeat.questionDurationMs,
+        reason: hotSeat.timerPauseReason
+      })
+    : renderHotSeatOptionsWaiting("Reveal the options when you want the contestant to start answering. The timer starts only then.");
+  const callTimerMarkup = hotSeat.callTimer?.timerState && hotSeat.callTimer.timerState !== "idle"
+    ? renderMiniTimer("Call A Friend", hotSeat.callTimer.endsAt, hotSeat.callTimer.startedAt, {
+        paused: hotSeat.callTimer.timerState === "paused",
+        stopped: hotSeat.callTimer.timerState === "stopped",
+        remainingMs: hotSeat.callTimer.timerRemainingMs,
+        totalMs: hotSeat.callTimer.durationMs,
+        reason: hotSeat.callTimer.timerPauseReason
+      })
+    : "";
+  const canPauseCall = state.phase === "hotseat" && hotSeat.callTimer?.timerState === "running";
+  const canResumeCall = state.phase === "hotseat" && hotSeat.callTimer?.timerState === "paused";
+  const canEndCall = state.phase === "hotseat" && hotSeat.callTimer?.timerState && hotSeat.callTimer.timerState !== "idle" && hotSeat.callTimer.timerState !== "stopped";
   const historyRows = hotSeat.history
     .slice(-6)
     .reverse()
@@ -1821,21 +1856,46 @@ function renderHotSeatHost() {
                   <span class="meta-chip">${formatNumber(hotSeat.question.points)} pts</span>
                   <span class="meta-chip">Safe ${formatNumber(hotSeat.guaranteedScore)}</span>
                   <span class="meta-chip">Q${formatNumber((hotSeat.questionIndex || 0) + 1)}</span>
+                  <span class="meta-chip">${hotSeat.optionsVisible ? "Options live" : "Options hidden"}</span>
                 </div>
                 <p class="question-text">${escapeHtml(hotSeat.question.question)}</p>
                 ${hotSeatTimerMarkup}
-                <div class="options-grid">
-                  ${hotSeat.question.options
-                    .map(
-                      (option, index) => `
-                        <button class="option-card ${optionStateClass(index, hotSeat.question, hotSeat)}" type="button" data-host-action="hotseat-select-answer" data-answer-index="${index}" ${canSelectAnswer ? "" : "disabled"}>
-                          <span class="option-key">${LETTERS[index]}</span>
-                          <span class="option-copy">${escapeHtml(option)}</span>
-                        </button>
-                      `
-                    )
-                    .join("")}
+                <div class="inline-actions tight">
+                  <button class="button compact-button" type="button" data-host-action="hotseat-show-options" ${canShowOptions ? "" : "disabled"}>Show Options</button>
+                  <button class="ghost-button compact-button" type="button" data-host-action="hotseat-pause-timer" ${canPauseTimer ? "" : "disabled"}>Pause Timer</button>
+                  <button class="ghost-button compact-button" type="button" data-host-action="hotseat-resume-timer" ${canResumeTimer ? "" : "disabled"}>Resume Timer</button>
+                  <button class="ghost-button compact-button" type="button" data-host-action="hotseat-reset-timer" ${canResetTimer ? "" : "disabled"}>Reset Timer</button>
                 </div>
+                ${callTimerMarkup}
+                ${
+                  callTimerMarkup
+                    ? `
+                      <div class="inline-actions tight">
+                        <button class="ghost-button compact-button" type="button" data-host-action="hotseat-pause-call" ${canPauseCall ? "" : "disabled"}>Pause Call</button>
+                        <button class="ghost-button compact-button" type="button" data-host-action="hotseat-resume-call" ${canResumeCall ? "" : "disabled"}>Resume Call</button>
+                        <button class="ghost-button compact-button" type="button" data-host-action="hotseat-end-call" ${canEndCall ? "" : "disabled"}>End Call</button>
+                      </div>
+                    `
+                    : ""
+                }
+                ${
+                  hotSeat.optionsVisible
+                    ? `
+                      <div class="options-grid">
+                        ${hotSeat.question.options
+                          .map(
+                            (option, index) => `
+                              <button class="option-card ${optionStateClass(index, hotSeat.question, hotSeat)}" type="button" data-host-action="hotseat-select-answer" data-answer-index="${index}" ${canSelectAnswer ? "" : "disabled"}>
+                                <span class="option-key">${LETTERS[index]}</span>
+                                <span class="option-copy">${escapeHtml(option)}</span>
+                              </button>
+                            `
+                          )
+                          .join("")}
+                      </div>
+                    `
+                    : renderHotSeatOptionsWaiting("The projector is showing only the question stem right now.")
+                }
                 <div class="inline-actions tight">
                   ${["50/50", "Audience Poll", "Call a Friend"]
                     .map(
@@ -1847,7 +1907,6 @@ function renderHotSeatHost() {
                     )
                     .join("")}
                   <button class="ghost-button compact-button" type="button" data-host-action="hotseat-lock-audience-poll" ${canLockAudiencePoll ? "" : "disabled"}>Lock Audience Poll</button>
-                  <button class="ghost-button compact-button" type="button" data-host-action="hotseat-resume-timer" ${canResumeTimer ? "" : "disabled"}>Resume Timer</button>
                   <button class="button compact-button" type="button" data-host-action="hotseat-lock-answer" ${canLockAnswer ? "" : "disabled"}>Lock</button>
                   <button class="ghost-button compact-button" type="button" data-host-action="hotseat-reveal" ${canRevealAnswer ? "" : "disabled"}>Reveal</button>
                   <button class="ghost-button compact-button" type="button" data-host-action="hotseat-next" ${canNextQuestion ? "" : "disabled"}>Next</button>
@@ -1919,6 +1978,7 @@ function renderHotSeatHost() {
               ${renderCompactStat("Guaranteed", formatNumber(hotSeat.guaranteedScore || 0))}
               ${renderCompactStat("Used", formatNumber(hotSeat.lifelinesUsed?.length || 0))}
               ${renderCompactStat("Timer", hotSeat.timerState || "--")}
+              ${renderCompactStat("Call", hotSeat.callTimer?.timerState || "--")}
             </div>
           </article>
           <article class="glass-card compact-card compact-stack">
@@ -1939,13 +1999,24 @@ function renderHotSeatScreen() {
   const state = getState();
   const hotSeat = state.hotSeat;
   const question = hotSeat.question;
-  const hotSeatTimerMarkup = renderMiniTimer("Answer", hotSeat.endsAt, hotSeat.startedAt, {
-    paused: hotSeat.timerState === "paused",
-    stopped: hotSeat.timerState === "stopped",
-    remainingMs: hotSeat.timerRemainingMs,
-    totalMs: hotSeat.questionDurationMs,
-    reason: hotSeat.timerPauseReason
-  });
+  const hotSeatTimerMarkup = hotSeat.optionsVisible
+    ? renderMiniTimer("Answer", hotSeat.endsAt, hotSeat.startedAt, {
+        paused: hotSeat.timerState === "paused",
+        stopped: hotSeat.timerState === "stopped",
+        remainingMs: hotSeat.timerRemainingMs,
+        totalMs: hotSeat.questionDurationMs,
+        reason: hotSeat.timerPauseReason
+      })
+    : renderHotSeatOptionsWaiting("Options and answer timer will appear when the operator opens the answering window.");
+  const callTimerMarkup = hotSeat.callTimer?.timerState && hotSeat.callTimer.timerState !== "idle"
+    ? renderMiniTimer("Call A Friend", hotSeat.callTimer.endsAt, hotSeat.callTimer.startedAt, {
+        paused: hotSeat.callTimer.timerState === "paused",
+        stopped: hotSeat.callTimer.timerState === "stopped",
+        remainingMs: hotSeat.callTimer.timerRemainingMs,
+        totalMs: hotSeat.callTimer.durationMs,
+        reason: hotSeat.callTimer.timerPauseReason
+      })
+    : "";
   const historyRows = hotSeat.history
     .slice(-4)
     .reverse()
@@ -1976,22 +2047,30 @@ function renderHotSeatScreen() {
           <span class="meta-chip">${escapeHtml(question.topic)}</span>
           <span class="meta-chip">${formatNumber(question.points)} pts</span>
           <span class="meta-chip">Safe ${formatNumber(hotSeat.guaranteedScore)}</span>
+          <span class="meta-chip">${hotSeat.optionsVisible ? "Options live" : "Question only"}</span>
         </div>
         <p class="question-text">${escapeHtml(question.question)}</p>
         ${hotSeatTimerMarkup}
+        ${callTimerMarkup}
         ${hotSeat.reveal === "correct" ? `<div class="projector-popup" role="status" aria-live="polite">Correct Answer</div>` : ""}
-        <div class="options-grid">
-          ${question.options
-            .map(
-              (option, index) => `
-                <div class="option-card ${optionStateClass(index, question, hotSeat)}">
-                  <span class="option-key">${LETTERS[index]}</span>
-                  <span class="option-copy">${escapeHtml(option)}</span>
-                </div>
-              `
-            )
-            .join("")}
-        </div>
+        ${
+          hotSeat.optionsVisible
+            ? `
+              <div class="options-grid">
+                ${question.options
+                  .map(
+                    (option, index) => `
+                      <div class="option-card ${optionStateClass(index, question, hotSeat)}">
+                        <span class="option-key">${LETTERS[index]}</span>
+                        <span class="option-copy">${escapeHtml(option)}</span>
+                      </div>
+                    `
+                  )
+                  .join("")}
+              </div>
+            `
+            : renderHotSeatOptionsWaiting("Listen to the full question first. The operator will show the options and start the timer next.")
+        }
       </section>
     `;
   } else if (state.phase === "intermission" || hotSeat.status === "ended") {
