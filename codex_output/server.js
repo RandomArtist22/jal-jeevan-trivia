@@ -100,6 +100,7 @@ function createInitialState() {
       questionSetKey: DEFAULT_HOT_SEAT_SET,
       teamId: null,
       questionIndex: 0,
+      optionsVisible: false,
       startedAt: null,
       endsAt: null,
       questionDurationMs: 0,
@@ -116,7 +117,14 @@ function createInitialState() {
       lifelinesUsed: [],
       reducedOptionIndices: [],
       audiencePoll: null,
-      callActiveUntil: null,
+      callTimer: {
+        startedAt: null,
+        endsAt: null,
+        durationMs: 50000,
+        timerState: "idle",
+        timerRemainingMs: 0,
+        timerPauseReason: ""
+      },
       history: []
     }
   };
@@ -313,6 +321,7 @@ function buildStateForClient(client) {
       questionSetKey: state.hotSeat.questionSetKey,
       teamId: state.hotSeat.teamId,
       questionIndex: state.hotSeat.questionIndex,
+      optionsVisible: state.hotSeat.optionsVisible,
       startedAt: state.hotSeat.startedAt,
       endsAt: state.hotSeat.endsAt,
       questionDurationMs: state.hotSeat.questionDurationMs,
@@ -331,7 +340,16 @@ function buildStateForClient(client) {
       lifelinesUsed: state.hotSeat.lifelinesUsed.slice(),
       reducedOptionIndices: state.hotSeat.reducedOptionIndices.slice(),
       audiencePoll,
-      callActiveUntil: state.hotSeat.callActiveUntil,
+      callTimer: {
+        startedAt: state.hotSeat.callTimer.startedAt,
+        endsAt: state.hotSeat.callTimer.endsAt,
+        durationMs: state.hotSeat.callTimer.durationMs,
+        timerState: state.hotSeat.callTimer.timerState,
+        timerRemainingMs: state.hotSeat.callTimer.timerState === "running"
+          ? Math.max(0, (state.hotSeat.callTimer.endsAt || 0) - Date.now())
+          : state.hotSeat.callTimer.timerRemainingMs,
+        timerPauseReason: state.hotSeat.callTimer.timerPauseReason
+      },
       revealedAnswerIndex: state.hotSeat.reveal ? currentHotSeatQuestion?.answerIndex ?? null : null,
       history: clone(state.hotSeat.history),
       question: canSeeHotSeatQuestion ? sanitizeQuestion(currentHotSeatQuestion, isHost) : null,
@@ -576,6 +594,7 @@ function resetHotSeatForTeam(teamId) {
   state.hotSeat.status = "question-live";
   state.hotSeat.teamId = teamId;
   state.hotSeat.questionIndex = 0;
+  state.hotSeat.optionsVisible = false;
   state.hotSeat.currentScore = 0;
   state.hotSeat.guaranteedScore = 0;
   state.hotSeat.selectedAnswerIndex = null;
@@ -586,11 +605,11 @@ function resetHotSeatForTeam(teamId) {
   state.hotSeat.lifelinesUsed = [];
   state.hotSeat.reducedOptionIndices = [];
   state.hotSeat.audiencePoll = null;
-  state.hotSeat.callActiveUntil = null;
+  clearCallTimer();
   state.hotSeat.history = [];
-  startHotSeatTimer();
+  clearHotSeatTimer();
   state.phase = "hotseat";
-  state.notice = `${state.teams[teamId].name} on Hot Seat.`;
+  state.notice = `${state.teams[teamId].name} on Hot Seat. Reveal options to start the timer.`;
 }
 
 function getHotSeatAnswerWindowMs() {
@@ -605,6 +624,13 @@ function getHotSeatTimerRemaining(now = Date.now()) {
     return Math.max(0, state.hotSeat.endsAt - now);
   }
   return Math.max(0, state.hotSeat.timerRemainingMs || 0);
+}
+
+function getCallTimerRemaining(now = Date.now()) {
+  if (state.hotSeat.callTimer.timerState === "running" && state.hotSeat.callTimer.endsAt) {
+    return Math.max(0, state.hotSeat.callTimer.endsAt - now);
+  }
+  return Math.max(0, state.hotSeat.callTimer.timerRemainingMs || 0);
 }
 
 function startHotSeatTimer() {
@@ -652,6 +678,52 @@ function clearHotSeatTimer() {
   state.hotSeat.timerState = "idle";
   state.hotSeat.timerRemainingMs = 0;
   state.hotSeat.timerPauseReason = "";
+}
+
+function startCallTimer(durationMs = 50000) {
+  state.hotSeat.callTimer.durationMs = durationMs;
+  state.hotSeat.callTimer.startedAt = Date.now();
+  state.hotSeat.callTimer.endsAt = state.hotSeat.callTimer.startedAt + durationMs;
+  state.hotSeat.callTimer.timerState = "running";
+  state.hotSeat.callTimer.timerRemainingMs = durationMs;
+  state.hotSeat.callTimer.timerPauseReason = "";
+}
+
+function pauseCallTimer(reason = "") {
+  if (state.hotSeat.callTimer.timerState !== "running") return;
+  state.hotSeat.callTimer.timerRemainingMs = getCallTimerRemaining();
+  state.hotSeat.callTimer.endsAt = null;
+  state.hotSeat.callTimer.timerState = "paused";
+  state.hotSeat.callTimer.timerPauseReason = reason;
+}
+
+function resumeCallTimer() {
+  if (state.hotSeat.callTimer.timerState !== "paused") return;
+  const totalMs = state.hotSeat.callTimer.durationMs || 50000;
+  const remainingMs = Math.max(0, state.hotSeat.callTimer.timerRemainingMs || totalMs);
+  const now = Date.now();
+  state.hotSeat.callTimer.startedAt = now - (totalMs - remainingMs);
+  state.hotSeat.callTimer.endsAt = now + remainingMs;
+  state.hotSeat.callTimer.timerState = "running";
+  state.hotSeat.callTimer.timerPauseReason = "";
+}
+
+function stopCallTimer(reason = "") {
+  if (state.hotSeat.callTimer.timerState === "running") {
+    state.hotSeat.callTimer.timerRemainingMs = getCallTimerRemaining();
+  }
+  state.hotSeat.callTimer.endsAt = null;
+  state.hotSeat.callTimer.timerState = "stopped";
+  state.hotSeat.callTimer.timerPauseReason = reason || state.hotSeat.callTimer.timerPauseReason;
+}
+
+function clearCallTimer() {
+  state.hotSeat.callTimer.startedAt = null;
+  state.hotSeat.callTimer.endsAt = null;
+  state.hotSeat.callTimer.durationMs = 50000;
+  state.hotSeat.callTimer.timerState = "idle";
+  state.hotSeat.callTimer.timerRemainingMs = 0;
+  state.hotSeat.callTimer.timerPauseReason = "";
 }
 
 function recalculateAudiencePoll() {
@@ -716,8 +788,8 @@ function applyHotSeatLifeline(kind) {
   }
 
   if (kind === "Call a Friend") {
-    state.hotSeat.callActiveUntil = Date.now() + 50000;
     pauseHotSeatTimer("Call a Friend");
+    startCallTimer(50000);
     state.notice = "Call started.";
   }
 }
@@ -730,15 +802,16 @@ function moveToNextHotSeatQuestion() {
 
   state.hotSeat.questionIndex += 1;
   state.hotSeat.status = "question-live";
+  state.hotSeat.optionsVisible = false;
   state.hotSeat.selectedAnswerIndex = null;
   state.hotSeat.lockedAnswerIndex = null;
   state.hotSeat.reveal = null;
   state.hotSeat.revealReason = "";
   state.hotSeat.reducedOptionIndices = [];
   state.hotSeat.audiencePoll = null;
-  state.hotSeat.callActiveUntil = null;
-  startHotSeatTimer();
-  state.notice = `Hot Seat Q${state.hotSeat.questionIndex + 1}.`;
+  clearCallTimer();
+  clearHotSeatTimer();
+  state.notice = `Hot Seat Q${state.hotSeat.questionIndex + 1} ready. Reveal options to start the timer.`;
 }
 
 function finishHotSeatTurn(reason) {
@@ -752,6 +825,7 @@ function finishHotSeatTurn(reason) {
   state.hotSeat.status = "ended";
   state.hotSeat.audiencePoll = null;
   clearHotSeatTimer();
+  clearCallTimer();
   state.phase = "intermission";
   state.notice = reason === "completed"
     ? `${team?.name || "Team"} finished Hot Seat.`
@@ -850,6 +924,19 @@ function handleHostAction(action, payload = {}, client) {
       }
       resetHotSeatForTeam(payload.teamId);
       break;
+    case "hotseat-show-options":
+      if (state.phase !== "hotseat" || state.hotSeat.status !== "question-live" || !getHotSeatQuestion()) {
+        send(client, "error", { message: "No active Hot Seat question is ready." });
+        return;
+      }
+      if (state.hotSeat.optionsVisible) {
+        send(client, "error", { message: "Hot Seat options are already visible." });
+        return;
+      }
+      state.hotSeat.optionsVisible = true;
+      startHotSeatTimer();
+      state.notice = "Options live. Answer timer started.";
+      break;
     case "hotseat-resume-timer":
       if (state.phase !== "hotseat" || state.hotSeat.status !== "question-live" || state.hotSeat.timerState !== "paused") {
         send(client, "error", { message: "Hot Seat timer is not paused." });
@@ -859,8 +946,28 @@ function handleHostAction(action, payload = {}, client) {
         send(client, "error", { message: "Lock the audience poll before resuming the timer." });
         return;
       }
+      if (state.hotSeat.timerPauseReason === "Call a Friend" && ["running", "paused"].includes(state.hotSeat.callTimer.timerState)) {
+        send(client, "error", { message: "End or stop the call timer before resuming the answer timer." });
+        return;
+      }
       resumeHotSeatTimer();
       state.notice = "Hot Seat timer resumed.";
+      break;
+    case "hotseat-pause-timer":
+      if (state.phase !== "hotseat" || state.hotSeat.status !== "question-live" || state.hotSeat.timerState !== "running") {
+        send(client, "error", { message: "Hot Seat timer is not running." });
+        return;
+      }
+      pauseHotSeatTimer("Manual Pause");
+      state.notice = "Hot Seat timer paused.";
+      break;
+    case "hotseat-reset-timer":
+      if (state.phase !== "hotseat" || state.hotSeat.status !== "question-live" || !state.hotSeat.optionsVisible) {
+        send(client, "error", { message: "Hot Seat timer cannot be reset right now." });
+        return;
+      }
+      startHotSeatTimer();
+      state.notice = "Hot Seat timer reset.";
       break;
     case "hotseat-lock-audience-poll":
       if (state.phase !== "hotseat" || state.hotSeat.status !== "question-live" || state.hotSeat.audiencePoll?.status !== "open") {
@@ -869,11 +976,35 @@ function handleHostAction(action, payload = {}, client) {
       }
       lockAudiencePoll();
       break;
+    case "hotseat-pause-call":
+      if (state.phase !== "hotseat" || state.hotSeat.callTimer.timerState !== "running") {
+        send(client, "error", { message: "Call timer is not running." });
+        return;
+      }
+      pauseCallTimer("Manual Pause");
+      state.notice = "Call timer paused.";
+      break;
+    case "hotseat-resume-call":
+      if (state.phase !== "hotseat" || state.hotSeat.callTimer.timerState !== "paused") {
+        send(client, "error", { message: "Call timer is not paused." });
+        return;
+      }
+      resumeCallTimer();
+      state.notice = "Call timer resumed.";
+      break;
+    case "hotseat-end-call":
+      if (state.phase !== "hotseat" || state.hotSeat.callTimer.timerState === "idle") {
+        send(client, "error", { message: "Call timer is not active." });
+        return;
+      }
+      stopCallTimer("Ended");
+      state.notice = "Call ended. Resume answer timer.";
+      break;
     case "hotseat-next":
       moveToNextHotSeatQuestion();
       break;
     case "hotseat-select-answer":
-      if (state.phase !== "hotseat" || state.hotSeat.status !== "question-live") {
+      if (state.phase !== "hotseat" || state.hotSeat.status !== "question-live" || !state.hotSeat.optionsVisible) {
         send(client, "error", { message: "Hot Seat is not accepting answers right now." });
         return;
       }
@@ -881,7 +1012,7 @@ function handleHostAction(action, payload = {}, client) {
       state.notice = `${getTeam(state.hotSeat.teamId)?.name || "Team"} selected.`;
       break;
     case "hotseat-lock-answer":
-      if (state.phase !== "hotseat" || state.hotSeat.status !== "question-live") {
+      if (state.phase !== "hotseat" || state.hotSeat.status !== "question-live" || !state.hotSeat.optionsVisible) {
         send(client, "error", { message: "Hot Seat is not accepting a lock right now." });
         return;
       }
@@ -897,6 +1028,10 @@ function handleHostAction(action, payload = {}, client) {
       revealHotSeatAnswer("host");
       break;
     case "hotseat-lifeline":
+      if (state.phase !== "hotseat" || state.hotSeat.status !== "question-live" || !state.hotSeat.optionsVisible) {
+        send(client, "error", { message: "Reveal the options before using a Hot Seat lifeline." });
+        return;
+      }
       applyHotSeatLifeline(String(payload.kind || ""));
       break;
     case "hotseat-end-turn":
@@ -1076,10 +1211,11 @@ function tick() {
     changed = true;
   }
 
-  if (state.hotSeat.callActiveUntil && now >= state.hotSeat.callActiveUntil) {
-    state.hotSeat.callActiveUntil = null;
+  if (state.hotSeat.callTimer.timerState === "running" && state.hotSeat.callTimer.endsAt && now >= state.hotSeat.callTimer.endsAt) {
+    state.hotSeat.callTimer.timerRemainingMs = 0;
+    stopCallTimer("Timeout");
     if (state.phase === "hotseat" && state.hotSeat.timerState === "paused" && state.hotSeat.timerPauseReason === "Call a Friend") {
-      state.notice = "Call ended. Resume timer.";
+      state.notice = "Call ended. Resume answer timer.";
     }
     changed = true;
   }
