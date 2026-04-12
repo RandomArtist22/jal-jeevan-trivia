@@ -1,2 +1,0 @@
-[    6303ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://encrypted-tbn0.gstatic.com/faviconV2?url=https://ieeexplore.ieee.org&client=AIM&size=128&type=FAVICON&fallback_opts=TYPE,SIZE,URL:0
-[   38804ms] [WARNING] Intercom - Google Analytics is not installed or configured, have you forgotten to include it? @ https://js.intercomcdn.com/frame-modern.40aacdf2.js:0
